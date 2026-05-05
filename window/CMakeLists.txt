@@ -1,7 +1,24 @@
-add_library(window
-    window.cpp
-    window.hpp
+add_library(window STATIC
+    windows_window.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendors/GLAD/src/glad.c
 )
 
-# Makes include paths available to anyone who links this library
-target_include_directories(window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(window
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendors/GLAD/include
+)
+
+target_compile_definitions(window PRIVATE GLAD_GL_IMPLEMENTATION)
+
+if(WIN32)
+    target_sources(window PRIVATE windows_window.cpp)
+    target_link_libraries(
+        window
+        PRIVATE
+            dwmapi.lib
+            opengl32.lib
+    )
+elseif(UNIX AND NOT APPLE)
+    target_sources(window PRIVATE linux_window.cpp)
+endif()

@@ -14,10 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)  # Use -std=c++23, not -std=gnu++23
 # Enable warning as error
 set(CMAKE_COMPILE_WARNING_AS_ERROR on)
 
-option(ENABLE_SANITIZERS "Enable sanitizers" OFF)
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    option(ENABLE_SANITIZERS "Enable sanitizers" ON)
-endif()
+option(ENABLE_SANITIZERS "Enable sanitizers" ON)
 
 # Enable sanitizers
 if(ENABLE_SANITIZERS AND NOT MSVC)
