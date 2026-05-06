@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 4.1.1)
 project(ChatAPP
     VERSION 0.0.1
     DESCRIPTION "An chat application written in CPP for learning purposes"
-    LANGUAGES CXX
+    LANGUAGES C CXX
 )
 
 # Require C++23

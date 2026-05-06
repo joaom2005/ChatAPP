@@ -6,7 +6,8 @@
 
 class Window {
 protected:
-  virtual void create(int width, int height, std::string title) = 0;
+  virtual void create(int width, int height, std::string title,
+                      std::string className) = 0;
 
 public:
   virtual ~Window() = default;
@@ -20,6 +21,7 @@ public:
   virtual int getHeight() const = 0;
 };
 
-std::unique_ptr<Window> createWindow(int width, int height, std::string title);
+std::unique_ptr<Window> createWindow(int width, int height, std::string title,
+                                     std::string className);
 
 #endif // _WINDOW_HPP

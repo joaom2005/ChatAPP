@@ -9,8 +9,6 @@ target_include_directories(window
         ${CMAKE_CURRENT_SOURCE_DIR}/vendors/GLAD/include
 )
 
-target_compile_definitions(window PRIVATE GLAD_GL_IMPLEMENTATION)
-
 if(WIN32)
     target_sources(window PRIVATE windows_window.cpp)
     target_link_libraries(
