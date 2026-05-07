@@ -1,17 +1,134 @@
+#include "context.hpp"
 #include "window.hpp"
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
 
 class LinuxWindow : public Window {
 public:
-    void create(int width, int height, const char* title) override {
-        std::cout << "Linux window created\n";
+  LinuxWindow(int width, int height, std::string title, std::string className) {
+    create(width, height, std::move(title), className);
+  }
+
+  ~LinuxWindow() override {
+    glContext.reset();
+
+    if (window != 0 && display) {
+      XDestroyWindow(display, window);
+      window = 0;
     }
 
-    void pollEvents() override {}
-    void swapBuffers() override {}
+    if (display) {
+      XCloseDisplay(display);
+      display = nullptr;
+    }
+  }
+
+  void pollEvents() override {
+    if (!display) {
+      return;
+    }
+
+    XEvent event;
+    while (XPending(display)) {
+      XNextEvent(display, &event);
+
+      switch (event.type) {
+      case DestroyNotify:
+        m_shouldClose = true;
+        break;
+      case ClientMessage: {
+        if (event.xclient.data.l[0] == static_cast<long>(wmDeleteWindow)) {
+          m_shouldClose = true;
+        }
+        break;
+      }
+      case ConfigureNotify: {
+        m_width = event.xconfigure.width;
+        m_height = event.xconfigure.height;
+        break;
+      }
+      default:
+        break;
+      }
+    }
+  }
+
+  void swapBuffers() override {
+    if (glContext) {
+      glContext->swapBuffers();
+    }
+  }
+
+  bool shouldClose() const override { return m_shouldClose; }
+  int getWidth() const override { return m_width; }
+  int getHeight() const override { return m_height; }
+
+protected:
+  void create(int width, int height, std::string title,
+              std::string className) override {
+    m_width = width;
+    m_height = height;
+    m_title = std::move(title);
+
+    // Open X11 display
+    display = XOpenDisplay(nullptr);
+    if (!display) {
+      throw std::runtime_error("Failed to open X11 display");
+    }
+
+    // Get the default screen
+    int screen = DefaultScreen(display);
+    Window rootWindow = RootWindow(display, screen);
+
+    // Create the window
+    window = XCreateSimpleWindow(display, rootWindow, 0, 0, m_width, m_height,
+                                 0, BlackPixel(display, screen),
+                                 BlackPixel(display, screen));
+
+    if (!window) {
+      XCloseDisplay(display);
+      throw std::runtime_error("Failed to create X11 window");
+    }
+
+    // Set window title
+    XStoreName(display, window, m_title.c_str());
+
+    // Register for window close events
+    wmDeleteWindow = XInternAtom(display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(display, window, &wmDeleteWindow, 1);
+
+    // Select input events
+    XSelectInput(display, window,
+                 ExposureMask | StructureNotifyMask | KeyPressMask |
+                     KeyReleaseMask | PointerMotionMask | ButtonPressMask |
+                     ButtonReleaseMask);
+
+    // Map the window to the screen
+    XMapWindow(display, window);
+
+    // Create GL context
+    glContext = createGLContext(display);
+  }
+
+private:
+  Display *display = nullptr;
+  Window window = 0;
+  Atom wmDeleteWindow = 0;
+  std::unique_ptr<GLContext> glContext;
+
+  int m_width = 0;
+  int m_height = 0;
+  std::string m_title;
+  bool m_shouldClose = false;
 };
 
-// Factory function
-Window* createWindow() {
-    return new LinuxWindow();
+std::unique_ptr<Window> createWindow(int width, int height, std::string title,
+                                     std::string className) {
+  return std::make_unique<LinuxWindow>(width, height, std::move(title),
+                                       className);
 }

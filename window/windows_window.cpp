@@ -1,8 +1,10 @@
 #include "window.hpp"
+#include "context.hpp"
 
 #include <dwmapi.h>
-#include <glad/glad.h>
+// #include <glad/glad.h>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <windows.h>
 
@@ -14,11 +16,7 @@ public:
   }
 
   ~WindowsWindow() override {
-    if (glContext) {
-      wglMakeCurrent(nullptr, nullptr);
-      wglDeleteContext(glContext);
-      glContext = nullptr;
-    }
+    glContext.reset();
 
     if (hdc) {
       ReleaseDC(hwnd, hdc);
@@ -44,8 +42,8 @@ public:
   }
 
   void swapBuffers() override {
-    if (hdc) {
-      ::SwapBuffers(hdc);
+    if (glContext) {
+      glContext->swapBuffers();
     }
   }
 
@@ -77,12 +75,12 @@ protected:
         throw std::runtime_error("Failed to register window class: " +
                                  std::to_string(error));
       }
-      // If already exists, continue (assuming it's the same)
     }
 
-    hwnd = CreateWindowEx(
-        0, "MyWindowClass", m_title.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
-        CW_USEDEFAULT, width, height, nullptr, nullptr, wc.hInstance, nullptr);
+    hwnd =
+        CreateWindowEx(0, className.c_str(), m_title.c_str(),
+                       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width,
+                       height, nullptr, nullptr, wc.hInstance, nullptr);
 
     if (hwnd == nullptr) {
       throw std::runtime_error("Failed to create window: " +
@@ -93,58 +91,13 @@ protected:
 
     ShowWindow(hwnd, SW_SHOW);
 
-    initOpenGL();
-  }
-
-private:
-  void initOpenGL() {
     hdc = GetDC(hwnd);
     if (!hdc) {
       throw std::runtime_error("Failed to get device context: " +
                                std::to_string(GetLastError()));
     }
 
-    PIXELFORMATDESCRIPTOR pfd = {};
-    pfd.nSize = sizeof(pfd);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 32;
-    pfd.cDepthBits = 24;
-    pfd.cStencilBits = 8;
-    pfd.iLayerType = PFD_MAIN_PLANE;
-
-    int pixelFormat = ChoosePixelFormat(hdc, &pfd);
-    if (pixelFormat == 0) {
-      throw std::runtime_error("Failed to choose pixel format: " +
-                               std::to_string(GetLastError()));
-    }
-
-    if (!SetPixelFormat(hdc, pixelFormat, &pfd)) {
-      throw std::runtime_error("Failed to set pixel format: " +
-                               std::to_string(GetLastError()));
-    }
-
-    HGLRC tempContext = wglCreateContext(hdc);
-    if (!tempContext) {
-      throw std::runtime_error("Failed to create temporary OpenGL context: " +
-                               std::to_string(GetLastError()));
-    }
-
-    if (!wglMakeCurrent(hdc, tempContext)) {
-      wglDeleteContext(tempContext);
-      throw std::runtime_error(
-          "Failed to make temporary OpenGL context current: " +
-          std::to_string(GetLastError()));
-    }
-
-    if (!gladLoadGLLoader((GLADloadproc)wglGetProcAddress)) {
-      wglMakeCurrent(nullptr, nullptr);
-      wglDeleteContext(tempContext);
-      throw std::runtime_error("Failed to initialize GLAD");
-    }
-
-    glContext = tempContext;
+    glContext = createGLContext(hdc);
   }
 
 private:
@@ -180,7 +133,7 @@ private:
 private:
   HWND hwnd = nullptr;
   HDC hdc = nullptr;
-  HGLRC glContext = nullptr;
+  std::unique_ptr<GLContext> glContext;
 
   int m_width;
   int m_height;

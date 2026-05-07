@@ -1,5 +1,5 @@
-#ifndef _WINDOW_HPP
-#define _WINDOW_HPP
+#ifndef __HPP_WINDOW__
+#define __HPP_WINDOW__
 
 #include <memory>
 #include <string>
@@ -24,4 +24,4 @@ public:
 std::unique_ptr<Window> createWindow(int width, int height, std::string title,
                                      std::string className);
 
-#endif // _WINDOW_HPP
+#endif // __HPP_WINDOW__

@@ -1,5 +1,4 @@
 add_library(window STATIC
-    windows_window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vendors/GLAD/src/glad.c
 )
 
@@ -10,7 +9,7 @@ target_include_directories(window
 )
 
 if(WIN32)
-    target_sources(window PRIVATE windows_window.cpp)
+    target_sources(window PRIVATE windows_window.cpp window_context.cpp)
     target_link_libraries(
         window
         PRIVATE
@@ -18,5 +17,11 @@ if(WIN32)
             opengl32.lib
     )
 elseif(UNIX AND NOT APPLE)
-    target_sources(window PRIVATE linux_window.cpp)
+    target_sources(window PRIVATE linux_window.cpp linux_context.cpp)
+    target_link_libraries(
+        window
+        PRIVATE
+            GL
+            X11
+    )
 endif()

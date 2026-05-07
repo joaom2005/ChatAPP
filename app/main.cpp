@@ -4,7 +4,8 @@
 #include <glad/glad.h>
 
 int main() {
-  std::unique_ptr<Window> window = createWindow(800, 400, "ChatAPP", "chatapp");
+  std::unique_ptr<Window> window =
+      createWindow(800, 400, "ChatAPP", "chat-app");
 
   glViewport(0, 0, window->getWidth(), window->getHeight());
 
