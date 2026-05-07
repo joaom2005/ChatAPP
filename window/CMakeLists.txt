@@ -9,7 +9,7 @@ target_include_directories(window
 )
 
 if(WIN32)
-    target_sources(window PRIVATE windows_window.cpp window_context.cpp)
+    target_sources(window PRIVATE windows/windows_window.cpp windows/window_context.cpp)
     target_link_libraries(
         window
         PRIVATE
@@ -17,7 +17,7 @@ if(WIN32)
             opengl32.lib
     )
 elseif(UNIX AND NOT APPLE)
-    target_sources(window PRIVATE linux_window.cpp linux_context.cpp)
+    target_sources(window PRIVATE linux/linux_window.cpp linux/linux_context.cpp)
     target_link_libraries(
         window
         PRIVATE
