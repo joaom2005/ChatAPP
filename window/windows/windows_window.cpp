@@ -7,6 +7,7 @@
 #include <memory>
 #include <stdexcept>
 #include <windows.h>
+#include <functional>
 
 class WindowsWindow : public Window {
 public:
@@ -35,10 +36,21 @@ public:
       TranslateMessage(&msg);
       DispatchMessage(&msg);
 
-      if (msg.message == WM_QUIT) {
+      switch (msg.message) {
+      case WM_QUIT: {
         m_shouldClose = true;
+        break;
+      }
+
+      default:
+        break;
       }
     }
+
+    // Validate the window rect to clear any pending paint messages
+    // This prevents the system from trying to repaint while we handle
+    // continuous rendering
+    ValidateRect(hwnd, nullptr);
   }
 
   void swapBuffers() override {
@@ -50,6 +62,10 @@ public:
   bool shouldClose() const override { return m_shouldClose; }
   int getWidth() const override { return m_width; }
   int getHeight() const override { return m_height; }
+
+  void setResizeCallback(std::function<void()> callback) override {
+    m_resizeCallback = callback;
+  }
 
 protected:
   void create(int width, int height, std::string title,
@@ -87,6 +103,12 @@ protected:
                                std::to_string(GetLastError()));
     }
 
+    // Store pointer to this instance in the window's user data
+    SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
+    // Disable DWM composition during resize to prevent lag
+    DwmEnableMMCSS(TRUE);
+
     applyModernStyle(hwnd);
 
     ShowWindow(hwnd, SW_SHOW);
@@ -103,10 +125,73 @@ protected:
 private:
   static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wp,
                                      LPARAM lp) {
-    if (msg == WM_DESTROY) {
-      PostQuitMessage(0);
-      return 0;
+    // Retrieve the instance pointer stored in GWLP_USERDATA
+    WindowsWindow *pThis = nullptr;
+
+    if (msg == WM_CREATE) {
+      CREATESTRUCT *pCreate = reinterpret_cast<CREATESTRUCT *>(lp);
+      pThis = reinterpret_cast<WindowsWindow *>(pCreate->lpCreateParams);
+      SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)pThis);
+    } else {
+      pThis = reinterpret_cast<WindowsWindow *>(
+          GetWindowLongPtr(hwnd, GWLP_USERDATA));
     }
+
+    if (pThis) {
+      switch (msg) {
+      case WM_DESTROY: {
+        PostQuitMessage(0);
+        return 0;
+      }
+
+      case WM_PAINT: {
+        // Handle paint messages to prevent black void during resize
+        // We let the main render loop handle drawing
+        PAINTSTRUCT ps;
+        BeginPaint(hwnd, &ps);
+        EndPaint(hwnd, &ps);
+        return 0;
+      }
+
+      case WM_SIZE: {
+        pThis->m_width = LOWORD(lp);  // New client area width
+        pThis->m_height = HIWORD(lp); // New client area height
+        return 0;
+      }
+
+      case WM_ENTERSIZEMOVE: {
+        // User started resizing - set up a timer to keep rendering
+        SetTimer(hwnd, 1, 1, nullptr);
+        return 0;
+      }
+
+      case WM_EXITSIZEMOVE: {
+        // User finished resizing - kill the timer
+        KillTimer(hwnd, 1);
+        return 0;
+      }
+
+      case WM_TIMER: {
+        // During resize, keep processing messages and render
+        if (wp == 1) {
+          MSG msg;
+          while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+          }
+          // Call the resize callback to trigger rendering
+          if (pThis && pThis->m_resizeCallback) {
+            pThis->m_resizeCallback();
+          }
+        }
+        return 0;
+      }
+
+      default:
+        break;
+      }
+    }
+
     return DefWindowProc(hwnd, msg, wp, lp);
   }
 
@@ -137,6 +222,7 @@ private:
 
   int m_width;
   int m_height;
+  std::function<void()> m_resizeCallback = nullptr;
 
   std::string m_title;
 

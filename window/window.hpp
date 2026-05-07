@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <functional>
 
 class Window {
 protected:
@@ -14,6 +15,9 @@ public:
 
   virtual void pollEvents() = 0;
   virtual void swapBuffers() = 0;
+  
+  // Set a callback to be called during window resizing/moving
+  virtual void setResizeCallback(std::function<void()> callback) = 0;
 
 public:
   virtual bool shouldClose() const = 0;

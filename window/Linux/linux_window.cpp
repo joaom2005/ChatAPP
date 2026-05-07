@@ -3,10 +3,12 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
+
 
 class LinuxWindow : public Window {
 public:
@@ -50,6 +52,10 @@ public:
       case ConfigureNotify: {
         m_width = event.xconfigure.width;
         m_height = event.xconfigure.height;
+        // Call resize callback when window is resized
+        if (m_resizeCallback) {
+          m_resizeCallback();
+        }
         break;
       }
       default:
@@ -67,6 +73,10 @@ public:
   bool shouldClose() const override { return m_shouldClose; }
   int getWidth() const override { return m_width; }
   int getHeight() const override { return m_height; }
+
+  void setResizeCallback(std::function<void()> callback) override {
+    m_resizeCallback = callback;
+  }
 
 protected:
   void create(int width, int height, std::string title,
@@ -125,6 +135,7 @@ private:
   int m_height = 0;
   std::string m_title;
   bool m_shouldClose = false;
+  std::function<void()> m_resizeCallback = nullptr;
 };
 
 std::unique_ptr<Window> createWindow(int width, int height, std::string title,
