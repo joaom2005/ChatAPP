@@ -1,31 +1,41 @@
 #include "context.hpp"
 
+#include <GL/glx.h>
+#include <X11/Xlib.h>
 #include <glad/glad.h>
 #include <stdexcept>
 #include <string>
-#include <GL/glx.h>
-#include <X11/Xlib.h>
 
 class LinuxGLContext : public GLContext {
 public:
-  LinuxGLContext(Display* display, Window window);
-  ~LinuxGLContext() override;
+  LinuxGLContext(Display *display, Window window)
+      : display(display), window(window) {
+    initOpenGL(display, window);
+  }
+
+  ~LinuxGLContext() override {
+    if (glContext && display) {
+      glXMakeCurrent(display, None, nullptr);
+      glXDestroyContext(display, glContext);
+      glContext = nullptr;
+    }
+  }
 
   void swapBuffers() override;
   bool isValid() const override;
 
 private:
-  void initOpenGL(Display* display, Window window);
+  void initOpenGL(Display *display, Window window);
 
-  Display* display = nullptr;
+  Display *display = nullptr;
   Window window = 0;
   GLXContext glContext = nullptr;
 };
 
-LinuxGLContext::LinuxGLContext(Display* display, Window window)
-    : display(display), window(window) {
-  initOpenGL(display, window);
-}
+// LinuxGLContext::LinuxGLContext(Display* display, Window window)
+//     : display(display), window(window) {
+//   initOpenGL(display, window);
+// }
 
 LinuxGLContext::~LinuxGLContext() {
   if (glContext && display) {
@@ -41,24 +51,17 @@ void LinuxGLContext::swapBuffers() {
   }
 }
 
-bool LinuxGLContext::isValid() const {
-  return glContext != nullptr;
-}
+bool LinuxGLContext::isValid() const { return glContext != nullptr; }
 
-void LinuxGLContext::initOpenGL(Display* display, Window window) {
+void LinuxGLContext::initOpenGL(Display *display, Window window) {
   if (!display || !window) {
     throw std::runtime_error("Invalid X11 display or window");
   }
 
   // Get a visual that supports OpenGL
-  int attribs[] = {
-    GLX_RGBA,
-    GLX_DEPTH_SIZE, 24,
-    GLX_DOUBLEBUFFER,
-    None
-  };
+  int attribs[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None};
 
-  XVisualInfo* vi = glXChooseVisual(display, DefaultScreen(display), attribs);
+  XVisualInfo *vi = glXChooseVisual(display, DefaultScreen(display), attribs);
   if (!vi) {
     throw std::runtime_error("Failed to choose X11 visual for OpenGL");
   }
@@ -86,11 +89,11 @@ void LinuxGLContext::initOpenGL(Display* display, Window window) {
   glContext = tempContext;
 }
 
-std::unique_ptr<GLContext> createGLContext(void* nativeHandle) {
+std::unique_ptr<GLContext> createGLContext(void *nativeHandle) {
   // nativeHandle should point to a pair: {Display*, Window}
   // For now, we pass Display* as the handle and Window separately
   // This is a simplified approach - you may need to adjust based on your needs
-  Display* display = static_cast<Display*>(nativeHandle);
+  Display *display = static_cast<Display *>(nativeHandle);
   if (!display) {
     throw std::runtime_error("Invalid Display pointer");
   }

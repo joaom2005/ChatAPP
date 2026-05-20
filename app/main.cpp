@@ -1,28 +1,23 @@
+#include <input.hpp>
 #include <iostream>
 #include <window.hpp>
 
-#include <glad/glad.h>
-
 int main() {
+  auto queue = std::make_shared<EventQueue>();
   std::unique_ptr<Window> window =
-      createWindow(800, 400, "ChatAPP", "chat-app");
-  glViewport(0, 0, window->getWidth(), window->getHeight());
+      createWindow(queue, 800, 400, "ChatAPP", "chat-app");
+  auto input = std::make_unique<Input>(queue);
 
-  // Lambda to render a frame
-  auto renderFrame = [&window]() {
-    glViewport(0, 0, window->getWidth(), window->getHeight());
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    window->swapBuffers();
-  };
-
-  // Set the callback to be called during resize
-  window->setResizeCallback(renderFrame);
+  window->setBackgroundColor(1.0f, 1.0f, 1.0f, 1.0f);
 
   while (!window->shouldClose()) {
     window->pollEvents();
+    window->renderFrame();
 
-    renderFrame();
+    input->update();
+
+    if (input->isKeyPressed(Key::Escape))
+      window->forceClose();
   }
 
   return 0;

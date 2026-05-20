@@ -1,5 +1,5 @@
-#ifndef __H_CONTEXT__
-#define __H_CONTEXT__
+#ifndef __HPP_CONTEXT__
+#define __HPP_CONTEXT__
 
 #include <memory>
 
@@ -14,4 +14,4 @@ public:
 // Factory function - platform-specific implementation
 std::unique_ptr<GLContext> createGLContext(void *nativeHandle);
 
-#endif // __H_CONTEXT__
+#endif // __HPP_CONTEXT__

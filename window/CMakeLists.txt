@@ -9,7 +9,7 @@ target_include_directories(window
 )
 
 if(WIN32)
-    target_sources(window PRIVATE windows/windows_window.cpp windows/window_context.cpp)
+    target_sources(window PRIVATE windows/windows_window.cpp windows/windows_context.cpp)
     target_link_libraries(
         window
         PRIVATE

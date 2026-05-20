@@ -4,11 +4,11 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <functional>
+#include <glad/glad.h>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
-
 
 class LinuxWindow : public Window {
 public:
@@ -52,10 +52,9 @@ public:
       case ConfigureNotify: {
         m_width = event.xconfigure.width;
         m_height = event.xconfigure.height;
+
         // Call resize callback when window is resized
-        if (m_resizeCallback) {
-          m_resizeCallback();
-        }
+        renderFrame();
         break;
       }
       default:
@@ -74,8 +73,18 @@ public:
   int getWidth() const override { return m_width; }
   int getHeight() const override { return m_height; }
 
-  void setResizeCallback(std::function<void()> callback) override {
-    m_resizeCallback = callback;
+  void setBackgroundColor(float r, float g, float b, float a) override {
+    m_bgColor[0] = r;
+    m_bgColor[1] = g;
+    m_bgColor[2] = b;
+    m_bgColor[3] = a;
+  }
+
+  void renderFrame() override {
+    glViewport(0, 0, m_width, m_height);
+    glClearColor(m_bgColor[0], m_bgColor[1], m_bgColor[2], m_bgColor[3]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    swapBuffers();
   }
 
 protected:
@@ -135,7 +144,9 @@ private:
   int m_height = 0;
   std::string m_title;
   bool m_shouldClose = false;
-  std::function<void()> m_resizeCallback = nullptr;
+
+  // Background color (RGBA)
+  float m_bgColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 };
 
 std::unique_ptr<Window> createWindow(int width, int height, std::string title,

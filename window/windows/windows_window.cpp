@@ -2,74 +2,22 @@
 #include "context.hpp"
 
 #include <dwmapi.h>
-// #include <glad/glad.h>
+#include <functional>
+#include <glad/glad.h>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <windows.h>
-#include <functional>
+
+#define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
+#define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 
 class WindowsWindow : public Window {
 public:
-  WindowsWindow(int width, int height, std::string title,
-                std::string className) {
-    create(width, height, std::move(title), className);
-  }
-
-  ~WindowsWindow() override {
-    glContext.reset();
-
-    if (hdc) {
-      ReleaseDC(hwnd, hdc);
-      hdc = nullptr;
-    }
-
-    if (hwnd) {
-      DestroyWindow(hwnd);
-      hwnd = nullptr;
-    }
-  }
-
-  void pollEvents() override {
-    MSG msg;
-    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
-
-      switch (msg.message) {
-      case WM_QUIT: {
-        m_shouldClose = true;
-        break;
-      }
-
-      default:
-        break;
-      }
-    }
-
-    // Validate the window rect to clear any pending paint messages
-    // This prevents the system from trying to repaint while we handle
-    // continuous rendering
-    ValidateRect(hwnd, nullptr);
-  }
-
-  void swapBuffers() override {
-    if (glContext) {
-      glContext->swapBuffers();
-    }
-  }
-
-  bool shouldClose() const override { return m_shouldClose; }
-  int getWidth() const override { return m_width; }
-  int getHeight() const override { return m_height; }
-
-  void setResizeCallback(std::function<void()> callback) override {
-    m_resizeCallback = callback;
-  }
-
-protected:
-  void create(int width, int height, std::string title,
-              std::string className) override {
+  WindowsWindow(std::shared_ptr<EventQueue> eventQueue, int width, int height,
+                std::string title, std::string className) {
+    m_eventQueue = eventQueue;
     m_width = width;
     m_height = height;
     m_title = std::move(title);
@@ -122,7 +70,90 @@ protected:
     glContext = createGLContext(hdc);
   }
 
+  ~WindowsWindow() override {
+    glContext.reset();
+
+    if (hdc) {
+      ReleaseDC(hwnd, hdc);
+      hdc = nullptr;
+    }
+
+    if (hwnd) {
+      DestroyWindow(hwnd);
+      hwnd = nullptr;
+    }
+  }
+
+  void pollEvents() override {
+    MSG msg;
+    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+
+      switch (msg.message) {
+      case WM_QUIT: {
+        m_shouldClose = true;
+        break;
+      }
+
+      default:
+        break;
+      }
+    }
+
+    // Validate the window rect to clear any pending paint messages
+    // This prevents the system from trying to repaint while we handle
+    // continuous rendering
+    ValidateRect(hwnd, nullptr);
+  }
+
+  void swapBuffers() override {
+    if (glContext) {
+      glContext->swapBuffers();
+    }
+  }
+
+  void forceClose() {
+    m_shouldClose = true;
+    PostQuitMessage(0);
+  }
+
+  bool shouldClose() const override { return m_shouldClose; }
+  int getWidth() const override { return m_width; }
+  int getHeight() const override { return m_height; }
+
+  void setBackgroundColor(float r, float g, float b, float a) override {
+    m_bgColor[0] = r;
+    m_bgColor[1] = g;
+    m_bgColor[2] = b;
+    m_bgColor[3] = a;
+  }
+
+  void renderFrame() override {
+    glViewport(0, 0, m_width, m_height);
+    glClearColor(m_bgColor[0], m_bgColor[1], m_bgColor[2], m_bgColor[3]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    swapBuffers();
+  }
+
 private:
+  static std::optional<Key> translateKey(WPARAM vk) {
+    switch (vk) {
+    case 'W':
+      return Key::W;
+    case 'A':
+      return Key::A;
+    case 'S':
+      return Key::S;
+    case 'D':
+      return Key::D;
+    case VK_ESCAPE:
+      return Key::Escape;
+    default:
+      return std::nullopt;
+    }
+  }
+
   static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wp,
                                      LPARAM lp) {
     // Retrieve the instance pointer stored in GWLP_USERDATA
@@ -139,20 +170,13 @@ private:
 
     if (pThis) {
       switch (msg) {
+      // Check for the end of the program
       case WM_DESTROY: {
         PostQuitMessage(0);
         return 0;
       }
 
-      case WM_PAINT: {
-        // Handle paint messages to prevent black void during resize
-        // We let the main render loop handle drawing
-        PAINTSTRUCT ps;
-        BeginPaint(hwnd, &ps);
-        EndPaint(hwnd, &ps);
-        return 0;
-      }
-
+      /* RESIZING SECTION - START */
       case WM_SIZE: {
         pThis->m_width = LOWORD(lp);  // New client area width
         pThis->m_height = HIWORD(lp); // New client area height
@@ -179,13 +203,38 @@ private:
             TranslateMessage(&msg);
             DispatchMessage(&msg);
           }
-          // Call the resize callback to trigger rendering
-          if (pThis && pThis->m_resizeCallback) {
-            pThis->m_resizeCallback();
-          }
+
+          // Refresh viewport and background while resizing
+          if (pThis)
+            pThis->renderFrame();
         }
         return 0;
       }
+        /* RESIZING SECTION - END */
+
+        /* INPUT SECTION - START */
+
+      case WM_KEYDOWN: {
+        if (auto key = translateKey(wp)) {
+          pThis->m_eventQueue->push(KeyEvent{*key, true});
+        }
+        return 0;
+      }
+
+      case WM_KEYUP: {
+        if (auto key = translateKey(wp)) {
+          pThis->m_eventQueue->push(KeyEvent{*key, false});
+        }
+        return 0;
+      }
+
+      case WM_MOUSEMOVE:
+        // compute delta, push MouseMove
+        pThis->m_eventQueue->push(
+            MouseMove{GET_X_LPARAM(lp), GET_Y_LPARAM(lp)});
+        return 0;
+
+        /* INPUT SECTION - END */
 
       default:
         break;
@@ -218,19 +267,23 @@ private:
 private:
   HWND hwnd = nullptr;
   HDC hdc = nullptr;
+  std::shared_ptr<EventQueue> m_eventQueue;
   std::unique_ptr<GLContext> glContext;
 
   int m_width;
   int m_height;
-  std::function<void()> m_resizeCallback = nullptr;
 
   std::string m_title;
 
   bool m_shouldClose = false;
+
+  // Background color (RGBA)
+  float m_bgColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 };
 
-std::unique_ptr<Window> createWindow(int width, int height, std::string title,
+std::unique_ptr<Window> createWindow(std::shared_ptr<EventQueue> eventQueue,
+                                     int width, int height, std::string title,
                                      std::string className) {
-  return std::make_unique<WindowsWindow>(width, height, std::move(title),
-                                         className);
+  return std::make_unique<WindowsWindow>(eventQueue, width, height,
+                                         std::move(title), className);
 }
