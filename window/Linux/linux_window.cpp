@@ -10,10 +10,51 @@
 #include <stdexcept>
 #include <string>
 
-class LinuxWindow : public Window {
+class LinuxWindow : public wWindow::Window {
 public:
   LinuxWindow(int width, int height, std::string title, std::string className) {
-    create(width, height, std::move(title), className);
+    m_width = width;
+    m_height = height;
+    m_title = std::move(title);
+
+    // Open X11 display
+    display = XOpenDisplay(nullptr);
+    if (!display) {
+      throw std::runtime_error("Failed to open X11 display");
+    }
+
+    // Get the default screen
+    int screen = DefaultScreen(display);
+    ::Window rootWindow = RootWindow(display, screen);
+
+    // Create the window
+    window = XCreateSimpleWindow(display, rootWindow, 0, 0, m_width, m_height,
+                                 0, BlackPixel(display, screen),
+                                 BlackPixel(display, screen));
+
+    if (!window) {
+      XCloseDisplay(display);
+      throw std::runtime_error("Failed to create X11 window");
+    }
+
+    // Set window title
+    XStoreName(display, window, m_title.c_str());
+
+    // Register for window close events
+    wmDeleteWindow = XInternAtom(display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(display, window, &wmDeleteWindow, 1);
+
+    // Select input events
+    XSelectInput(display, window,
+                 ExposureMask | StructureNotifyMask | KeyPressMask |
+                     KeyReleaseMask | PointerMotionMask | ButtonPressMask |
+                     ButtonReleaseMask);
+
+    // Map the window to the screen
+    XMapWindow(display, window);
+
+    // Create GL context
+    glContext = createGLContext(display);
   }
 
   ~LinuxWindow() override {
@@ -87,58 +128,11 @@ public:
     swapBuffers();
   }
 
-protected:
-  void create(int width, int height, std::string title,
-              std::string className) override {
-    m_width = width;
-    m_height = height;
-    m_title = std::move(title);
-
-    // Open X11 display
-    display = XOpenDisplay(nullptr);
-    if (!display) {
-      throw std::runtime_error("Failed to open X11 display");
-    }
-
-    // Get the default screen
-    int screen = DefaultScreen(display);
-    Window rootWindow = RootWindow(display, screen);
-
-    // Create the window
-    window = XCreateSimpleWindow(display, rootWindow, 0, 0, m_width, m_height,
-                                 0, BlackPixel(display, screen),
-                                 BlackPixel(display, screen));
-
-    if (!window) {
-      XCloseDisplay(display);
-      throw std::runtime_error("Failed to create X11 window");
-    }
-
-    // Set window title
-    XStoreName(display, window, m_title.c_str());
-
-    // Register for window close events
-    wmDeleteWindow = XInternAtom(display, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(display, window, &wmDeleteWindow, 1);
-
-    // Select input events
-    XSelectInput(display, window,
-                 ExposureMask | StructureNotifyMask | KeyPressMask |
-                     KeyReleaseMask | PointerMotionMask | ButtonPressMask |
-                     ButtonReleaseMask);
-
-    // Map the window to the screen
-    XMapWindow(display, window);
-
-    // Create GL context
-    glContext = createGLContext(display);
-  }
-
 private:
   Display *display = nullptr;
-  Window window = 0;
+  ::Window window = 0;
   Atom wmDeleteWindow = 0;
-  std::unique_ptr<GLContext> glContext;
+  std::unique_ptr<wWindow::GLContext> glContext;
 
   int m_width = 0;
   int m_height = 0;
@@ -149,8 +143,8 @@ private:
   float m_bgColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 };
 
-std::unique_ptr<Window> createWindow(int width, int height, std::string title,
-                                     std::string className) {
+std::unique_ptr<wWindow::Window>
+createWindow(int width, int height, std::string title, std::string className) {
   return std::make_unique<LinuxWindow>(width, height, std::move(title),
                                        className);
 }

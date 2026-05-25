@@ -13,10 +13,10 @@
 #define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
 #define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 
-class WindowsWindow : public Window {
+class WindowsWindow : public wWindow::Window {
 public:
-  WindowsWindow(std::shared_ptr<EventQueue> eventQueue, int width, int height,
-                std::string title, std::string className) {
+  WindowsWindow(std::shared_ptr<wWindow::EventQueue> eventQueue, int width,
+                int height, std::string title, std::string className) {
     m_eventQueue = eventQueue;
     m_width = width;
     m_height = height;
@@ -137,7 +137,8 @@ public:
   }
 
 private:
-  static std::optional<Key> translateKey(WPARAM vk) {
+  static std::optional<wWindow::Key> translateKey(WPARAM vk) {
+    using namespace wWindow;
     switch (vk) {
     case 'W':
       return Key::W;
@@ -156,6 +157,7 @@ private:
 
   static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wp,
                                      LPARAM lp) {
+    using namespace wWindow;
     // Retrieve the instance pointer stored in GWLP_USERDATA
     WindowsWindow *pThis = nullptr;
 
@@ -286,8 +288,8 @@ private:
 private:
   HWND hwnd = nullptr;
   HDC hdc = nullptr;
-  std::shared_ptr<EventQueue> m_eventQueue;
-  std::unique_ptr<GLContext> glContext;
+  std::shared_ptr<wWindow::EventQueue> m_eventQueue;
+  std::unique_ptr<wWindow::GLContext> glContext;
 
   int m_width;
   int m_height;
@@ -300,9 +302,9 @@ private:
   float m_bgColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 };
 
-std::unique_ptr<Window> createWindow(std::shared_ptr<EventQueue> eventQueue,
-                                     int width, int height, std::string title,
-                                     std::string className) {
+std::unique_ptr<wWindow::Window>
+createWindow(std::shared_ptr<wWindow::EventQueue> eventQueue, int width,
+             int height, std::string title, std::string className) {
   return std::make_unique<WindowsWindow>(eventQueue, width, height,
                                          std::move(title), className);
 }

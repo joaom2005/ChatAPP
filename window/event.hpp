@@ -4,6 +4,7 @@
 #include <queue>
 #include <variant>
 
+namespace wWindow {
 enum class Key {
   MouseLeftButton = 0,
   MouseMiddleButton,
@@ -14,6 +15,7 @@ enum class Key {
   S,
   D,
   Escape,
+  COUNT
 };
 
 struct KeyEvent {
@@ -40,5 +42,6 @@ public:
     return true;
   }
 };
+} // namespace wWindow
 
 #endif // __HPP_EVENT__

@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 
+namespace wWindow {
 class Window {
 public:
   virtual ~Window() = default;
@@ -14,13 +15,10 @@ public:
   virtual void pollEvents() = 0;
   virtual void swapBuffers() = 0;
 
-  // Set the background color for frame rendering
   virtual void setBackgroundColor(float r, float g, float b, float a) = 0;
 
-  // Render a frame with the background color and swap buffers
   virtual void renderFrame() = 0;
 
-  // Close the window from outside
   virtual void forceClose() = 0;
 
 public:
@@ -28,9 +26,10 @@ public:
   virtual int getWidth() const = 0;
   virtual int getHeight() const = 0;
 };
+} // namespace wWindow
 
-std::unique_ptr<Window> createWindow(std::shared_ptr<EventQueue> eventQueue,
-                                     int width, int height, std::string title,
-                                     std::string className);
+std::unique_ptr<wWindow::Window>
+createWindow(std::shared_ptr<wWindow::EventQueue> eventQueue, int width,
+             int height, std::string title, std::string className);
 
 #endif // __HPP_WINDOW__

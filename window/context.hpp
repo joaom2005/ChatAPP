@@ -3,6 +3,7 @@
 
 #include <memory>
 
+namespace wWindow {
 class GLContext {
 public:
   virtual ~GLContext() = default;
@@ -10,8 +11,8 @@ public:
   virtual void swapBuffers() = 0;
   virtual bool isValid() const = 0;
 };
+} // namespace wWindow
 
-// Factory function - platform-specific implementation
-std::unique_ptr<GLContext> createGLContext(void *nativeHandle);
+std::unique_ptr<wWindow::GLContext> createGLContext(void *nativeHandle);
 
 #endif // __HPP_CONTEXT__

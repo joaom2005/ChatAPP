@@ -1,16 +1,21 @@
 #ifndef __HPP_INPUT__
 #define __HPP_INPUT__
 
+#include <array>
 #include <memory>
 
 #include "event.hpp"
 #include "window.hpp"
 
+namespace wWindow {
 class Input {
+  static constexpr size_t KEY_COUNT = static_cast<size_t>(Key::COUNT);
+  static constexpr size_t idx(Key k) { return static_cast<size_t>(k); }
+
   std::shared_ptr<EventQueue> m_queue;
 
-  std::unordered_map<Key, bool> m_keys;
-  std::unordered_map<Key, bool> m_keysPrev;
+  std::array<bool, KEY_COUNT> m_keys{};
+  std::array<bool, KEY_COUNT> m_keysPrev{};
 
   int m_mouseDx = 0, m_mouseDy = 0;
   int m_mouseX = 0, m_mouseY = 0;
@@ -29,28 +34,23 @@ public:
     }
   }
 
-  bool isKeyDown(Key k) const {
-    auto it = m_keys.find(k);
-    return it != m_keys.end() && it->second;
-  }
+  bool isKeyDown(Key k) const { return m_keys[idx(k)]; }
   bool isKeyPressed(Key k) const {
-    return isKeyDown(k) && !wasPrev(k);
-  } // this frame only
-  bool isKeyReleased(Key k) const { return !isKeyDown(k) && wasPrev(k); }
+    return m_keys[idx(k)] && !m_keysPrev[idx(k)];
+  }
+  bool isKeyReleased(Key k) const {
+    return !m_keys[idx(k)] && m_keysPrev[idx(k)];
+  }
 
 private:
-  void handle(const KeyEvent &e) { m_keys[e.key] = e.pressed; }
+  void handle(const KeyEvent &e) { m_keys[idx(e.key)] = e.pressed; }
   void handle(const MouseMove &e) {
     m_mouseDx += e.dx;
     m_mouseDy += e.dy;
     m_mouseX += e.dx;
     m_mouseY += e.dy;
   }
-
-  bool wasPrev(Key k) const {
-    auto it = m_keysPrev.find(k);
-    return it != m_keysPrev.end() && it->second;
-  }
 };
+} // namespace wWindow
 
 #endif // __HPP_INPUT__

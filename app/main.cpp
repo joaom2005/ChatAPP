@@ -2,6 +2,10 @@
 #include <iostream>
 #include <window.hpp>
 
+// There shouldn't be any ambiguity on main, since only the interfaces are used,
+// so we can "using namespace" this
+using namespace wWindow;
+
 int main() {
   auto queue = std::make_shared<EventQueue>();
   std::unique_ptr<Window> window =
