@@ -5,6 +5,10 @@
 #include <variant>
 
 enum class Key {
+  MouseLeftButton = 0,
+  MouseMiddleButton,
+  MouseRightButton,
+
   W,
   A,
   S,
@@ -19,12 +23,8 @@ struct KeyEvent {
 struct MouseMove {
   int dx, dy;
 };
-struct MouseButton {
-  int button;
-  bool pressed;
-};
 
-using Event = std::variant<KeyEvent, MouseMove, MouseButton>;
+using Event = std::variant<KeyEvent, MouseMove>;
 
 class EventQueue {
   std::queue<Event> m_events;

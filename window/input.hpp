@@ -8,9 +8,12 @@
 
 class Input {
   std::shared_ptr<EventQueue> m_queue;
+
   std::unordered_map<Key, bool> m_keys;
   std::unordered_map<Key, bool> m_keysPrev;
+
   int m_mouseDx = 0, m_mouseDy = 0;
+  int m_mouseX = 0, m_mouseY = 0;
 
 public:
   explicit Input(std::shared_ptr<EventQueue> queue)
@@ -26,7 +29,10 @@ public:
     }
   }
 
-  bool isKeyDown(Key k) const { return m_keys.count(k) && m_keys.at(k); }
+  bool isKeyDown(Key k) const {
+    auto it = m_keys.find(k);
+    return it != m_keys.end() && it->second;
+  }
   bool isKeyPressed(Key k) const {
     return isKeyDown(k) && !wasPrev(k);
   } // this frame only
@@ -37,10 +43,14 @@ private:
   void handle(const MouseMove &e) {
     m_mouseDx += e.dx;
     m_mouseDy += e.dy;
+    m_mouseX += e.dx;
+    m_mouseY += e.dy;
   }
-  void handle(const MouseButton &) { /* ... */ }
 
-  bool wasPrev(Key k) const { return m_keysPrev.count(k) && m_keysPrev.at(k); }
+  bool wasPrev(Key k) const {
+    auto it = m_keysPrev.find(k);
+    return it != m_keysPrev.end() && it->second;
+  }
 };
 
 #endif // __HPP_INPUT__

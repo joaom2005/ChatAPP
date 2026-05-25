@@ -234,6 +234,25 @@ private:
             MouseMove{GET_X_LPARAM(lp), GET_Y_LPARAM(lp)});
         return 0;
 
+      case WM_LBUTTONDOWN:
+        pThis->m_eventQueue->push(KeyEvent{Key::MouseLeftButton, true});
+        return 0;
+      case WM_LBUTTONUP:
+        pThis->m_eventQueue->push(KeyEvent{Key::MouseLeftButton, false});
+        return 0;
+      case WM_RBUTTONDOWN:
+        pThis->m_eventQueue->push(KeyEvent{Key::MouseRightButton, true});
+        return 0;
+      case WM_RBUTTONUP:
+        pThis->m_eventQueue->push(KeyEvent{Key::MouseRightButton, false});
+        return 0;
+      case WM_MBUTTONDOWN:
+        pThis->m_eventQueue->push(KeyEvent{Key::MouseMiddleButton, true});
+        return 0;
+      case WM_MBUTTONUP:
+        pThis->m_eventQueue->push(KeyEvent{Key::MouseMiddleButton, false});
+        return 0;
+
         /* INPUT SECTION - END */
 
       default:
