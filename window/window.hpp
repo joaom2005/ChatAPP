@@ -26,10 +26,10 @@ public:
   virtual int getWidth() const = 0;
   virtual int getHeight() const = 0;
 };
-} // namespace wWindow
 
 std::unique_ptr<wWindow::Window>
 createWindow(std::shared_ptr<wWindow::EventQueue> eventQueue, int width,
              int height, std::string title, std::string className);
+} // namespace wWindow
 
 #endif // __HPP_WINDOW__

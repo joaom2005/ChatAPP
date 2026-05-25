@@ -11,8 +11,8 @@ public:
   virtual void swapBuffers() = 0;
   virtual bool isValid() const = 0;
 };
-} // namespace wWindow
 
 std::unique_ptr<wWindow::GLContext> createGLContext(void *nativeHandle);
+} // namespace wWindow
 
 #endif // __HPP_CONTEXT__

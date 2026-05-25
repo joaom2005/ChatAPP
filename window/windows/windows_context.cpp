@@ -76,6 +76,7 @@ private:
   HDC deviceContext = nullptr;
 };
 
-std::unique_ptr<wWindow::GLContext> createGLContext(void *nativeHandle) {
+std::unique_ptr<wWindow::GLContext>
+wWindow::createGLContext(void *nativeHandle) {
   return std::make_unique<WindowsGLContext>(static_cast<HDC>(nativeHandle));
 }

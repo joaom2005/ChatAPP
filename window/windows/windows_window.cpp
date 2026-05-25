@@ -67,7 +67,7 @@ public:
                                std::to_string(GetLastError()));
     }
 
-    glContext = createGLContext(hdc);
+    glContext = wWindow::createGLContext(hdc);
   }
 
   ~WindowsWindow() override {
@@ -303,8 +303,9 @@ private:
 };
 
 std::unique_ptr<wWindow::Window>
-createWindow(std::shared_ptr<wWindow::EventQueue> eventQueue, int width,
-             int height, std::string title, std::string className) {
+wWindow::createWindow(std::shared_ptr<wWindow::EventQueue> eventQueue,
+                      int width, int height, std::string title,
+                      std::string className) {
   return std::make_unique<WindowsWindow>(eventQueue, width, height,
                                          std::move(title), className);
 }

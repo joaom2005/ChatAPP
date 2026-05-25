@@ -53,7 +53,11 @@ public:
     }
   }
 
-  void swapBuffers() override;
+  void swapBuffers() override {
+    if (display && window) {
+      glXSwapBuffers(display, window);
+    }
+  };
   bool isValid() const override { return glContext != nullptr; }
 
 private:
@@ -62,21 +66,8 @@ private:
   GLXContext glContext = nullptr;
 };
 
-LinuxGLContext::~LinuxGLContext() {
-  if (glContext && display) {
-    glXMakeCurrent(display, None, nullptr);
-    glXDestroyContext(display, glContext);
-    glContext = nullptr;
-  }
-}
-
-void LinuxGLContext::swapBuffers() {
-  if (display && window) {
-    glXSwapBuffers(display, window);
-  }
-}
-
-std::unique_ptr<GLContext> createGLContext(void *nativeHandle) {
+std::unique_ptr<wWindow::GLContext>
+wWindow::createGLContext(void *nativeHandle) {
   // nativeHandle should point to a pair: {Display*, Window}
   // For now, we pass Display* as the handle and Window separately
   Display *display = static_cast<Display *>(nativeHandle);
