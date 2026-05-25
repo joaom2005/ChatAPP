@@ -1,6 +1,6 @@
+#include <window.hpp>
 #include <input.hpp>
 #include <iostream>
-#include <window.hpp>
 
 // There shouldn't be any ambiguity on main, since only the interfaces are used,
 // so we can "using namespace" this

@@ -8,7 +8,7 @@
 
 class LinuxGLContext : public wWindow::GLContext {
 public:
-  LinuxGLContext(Display *display, Window window)
+  LinuxGLContext(Display *display, ::Window window)
       : display(display), window(window) {
     if (!display || !window) {
       throw std::runtime_error("Invalid X11 display or window");
@@ -61,21 +61,18 @@ public:
   bool isValid() const override { return glContext != nullptr; }
 
 private:
-  Display *display = nullptr;
-  Window window = 0;
+  Display *display     = nullptr;
+  Window window        = 0;
   GLXContext glContext = nullptr;
 };
 
 std::unique_ptr<wWindow::GLContext>
 wWindow::createGLContext(void *nativeHandle) {
-  // nativeHandle should point to a pair: {Display*, Window}
-  // For now, we pass Display* as the handle and Window separately
-  Display *display = static_cast<Display *>(nativeHandle);
-  if (!display) {
-    throw std::runtime_error("Invalid Display pointer");
-  }
+  GLContextCreateInfo *context =
+      reinterpret_cast<GLContextCreateInfo *>(nativeHandle);
 
-  // Get the root window as a fallback
-  Window window = RootWindow(display, DefaultScreen(display));
+  Display *display = context->display;
+  ::Window window  = context->window;
+
   return std::make_unique<LinuxGLContext>(display, window);
 }
