@@ -17,7 +17,7 @@ if(WIN32)
             opengl32.lib
     )
 elseif(UNIX AND NOT APPLE)
-    target_compile_definitions(myapp PRIVATE IS_LINUX)
+    target_compile_definitions(window PRIVATE IS_LINUX)
     
     target_sources(window PRIVATE Linux/linux_window.cpp Linux/linux_context.cpp)
     target_link_libraries(

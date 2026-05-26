@@ -1,8 +1,9 @@
-#include "context.hpp"
+#include <context.hpp>
+#include <glad/glad.h>
+#include <window.hpp>
 
 #include <GL/glx.h>
 #include <X11/Xlib.h>
-#include <glad/glad.h>
 #include <stdexcept>
 #include <string>
 
@@ -61,8 +62,8 @@ public:
   bool isValid() const override { return glContext != nullptr; }
 
 private:
-  Display *display     = nullptr;
-  Window window        = 0;
+  Display *display = nullptr;
+  ::Window window = 0;
   GLXContext glContext = nullptr;
 };
 
@@ -72,7 +73,7 @@ wWindow::createGLContext(void *nativeHandle) {
       reinterpret_cast<GLContextCreateInfo *>(nativeHandle);
 
   Display *display = context->display;
-  ::Window window  = context->window;
+  ::Window window = context->window;
 
   return std::make_unique<LinuxGLContext>(display, window);
 }
