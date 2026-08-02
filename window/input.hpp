@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "event.hpp"
-#include "window.hpp"
 
 namespace wWindow {
 class Input {

@@ -4,9 +4,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
-#include <functional>
 #include <glad/glad.h>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -31,10 +29,22 @@ public:
     int screen = DefaultScreen(display);
     ::Window rootWindow = RootWindow(display, screen);
 
-    // Create the window
-    window = XCreateSimpleWindow(display, rootWindow, 0, 0, m_width, m_height,
-                                 0, BlackPixel(display, screen),
-                                 BlackPixel(display, screen));
+    XSetWindowAttributes attrs = {};
+    attrs.background_pixmap = None; // stop X from auto-painting background
+    attrs.border_pixel = BlackPixel(display, screen);
+    attrs.bit_gravity = ForgetGravity; // force full repaint instead of copying
+                                       // stale content on resize
+    attrs.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask |
+                       KeyReleaseMask | PointerMotionMask | ButtonPressMask |
+                       ButtonReleaseMask;
+
+    window = XCreateWindow(
+        display, rootWindow, 0, 0, m_width, m_height,
+        0,              // border width
+        CopyFromParent, // depth
+        InputOutput,
+        CopyFromParent, // visual — or pass the GLX visual if you have one
+        CWBackPixmap | CWBorderPixel | CWBitGravity | CWEventMask, &attrs);
 
     if (!window) {
       XCloseDisplay(display);
@@ -99,9 +109,6 @@ public:
       case ConfigureNotify: {
         m_width = event.xconfigure.width;
         m_height = event.xconfigure.height;
-
-        // Call resize callback when window is resized
-        renderFrame();
         break;
       }
       case KeyPress: {
@@ -152,20 +159,6 @@ public:
   int getWidth() const override { return m_width; }
   int getHeight() const override { return m_height; }
 
-  void setBackgroundColor(float r, float g, float b, float a) override {
-    m_bgColor[0] = r;
-    m_bgColor[1] = g;
-    m_bgColor[2] = b;
-    m_bgColor[3] = a;
-  }
-
-  void renderFrame() override {
-    glViewport(0, 0, m_width, m_height);
-    glClearColor(m_bgColor[0], m_bgColor[1], m_bgColor[2], m_bgColor[3]);
-    glClear(GL_COLOR_BUFFER_BIT);
-    swapBuffers();
-  }
-
 private:
   static std::optional<wWindow::Key> translateKey(KeySym keysym) {
     using namespace wWindow;
@@ -214,9 +207,6 @@ private:
   int m_height = 0;
   std::string m_title;
   bool m_shouldClose = false;
-
-  // Background color (RGBA)
-  float m_bgColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 };
 
 std::unique_ptr<wWindow::Window>

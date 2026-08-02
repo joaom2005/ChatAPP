@@ -23,10 +23,6 @@ public:
   virtual void pollEvents() = 0;
   virtual void swapBuffers() = 0;
 
-  virtual void setBackgroundColor(float r, float g, float b, float a) = 0;
-
-  virtual void renderFrame() = 0;
-
   virtual void forceClose() = 0;
 
 public:

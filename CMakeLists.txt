@@ -34,4 +34,6 @@ endif()
 
 # Add subdirectories
 add_subdirectory(window)
+add_subdirectory(graphics)
+add_subdirectory(ui)
 add_subdirectory(app)

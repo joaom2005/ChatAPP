@@ -1,3 +1,8 @@
 add_executable(app main.cpp)
 
-target_link_libraries(app PRIVATE window)
+target_link_libraries(app
+    PRIVATE
+        window
+        graphics
+        ui
+)

@@ -1,4 +1,5 @@
 #include <input.hpp>
+#include <renderer.hpp>
 #include <window.hpp>
 
 int main() {
@@ -7,11 +8,16 @@ int main() {
       createWindow(queue, 800, 400, "ChatAPP", "chat-app");
   auto input = std::make_unique<wWindow::Input>(queue);
 
-  window->setBackgroundColor(1.0f, 1.0f, 1.0f, 1.0f);
+  wGraphics::Renderer renderer;
+  wGraphics::Color bgColor{1.0f, 1.0f, 1.0f, 1.0f};
 
   while (!window->shouldClose()) {
     window->pollEvents();
-    window->renderFrame();
+
+    renderer.beginFrame(window->getWidth(), window->getHeight(), bgColor);
+    renderer.endFrame();
+
+    window->swapBuffers();
 
     input->update();
 

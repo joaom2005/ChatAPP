@@ -5,7 +5,6 @@
 #include <GL/glx.h>
 #include <X11/Xlib.h>
 #include <stdexcept>
-#include <string>
 
 class LinuxGLContext : public wWindow::GLContext {
 public:
