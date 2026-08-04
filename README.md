@@ -3,6 +3,10 @@
 ## Description
 This is (going to be) a chat application completely written from scratch, with as little dependencies necessaries.
 
+Curently needed dependencies:
+- GLUD - Needed to load OpenGL functions.
+- GLM - Header only library for math functions and structures.
+
 ## How to build
 The project is made in CMake. As such, to make the build files, run:
 
