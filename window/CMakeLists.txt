@@ -1,11 +1,13 @@
-add_library(window STATIC
-    ${PROJECT_SOURCE_DIR}/vendors/GLAD/src/glad.c
-)
+add_library(window STATIC)
 
 target_include_directories(window
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/vendors/GLAD/include
+)
+
+target_link_libraries(window
+    PUBLIC
+        glad
 )
 
 if(WIN32)

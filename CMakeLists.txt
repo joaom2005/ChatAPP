@@ -32,6 +32,18 @@ if(ENABLE_SANITIZERS AND NOT MSVC)
     )
 endif()
 
+# Shared GLAD library compiled once for the whole project
+add_library(glad STATIC
+    ${PROJECT_SOURCE_DIR}/vendors/GLAD/src/glad.c
+)
+
+target_include_directories(glad
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/vendors/GLAD/include
+        ${PROJECT_SOURCE_DIR}/vendors/glm
+        ${PROJECT_SOURCE_DIR}/vendors/stb
+)
+
 # Add subdirectories
 add_subdirectory(window)
 add_subdirectory(graphics)

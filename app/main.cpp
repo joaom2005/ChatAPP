@@ -15,6 +15,9 @@ int main() {
     window->pollEvents();
 
     renderer.beginFrame(window->getWidth(), window->getHeight(), bgColor);
+
+    renderer.drawRect(50, 50, 200, 100, {1.0f, 0.0f, 0.0f, 1.0f});
+
     renderer.endFrame();
 
     window->swapBuffers();
