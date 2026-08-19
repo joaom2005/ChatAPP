@@ -6,6 +6,7 @@ add_library(graphics STATIC
 target_include_directories(graphics
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/vendors/glm
 )
 
 target_link_libraries(graphics
