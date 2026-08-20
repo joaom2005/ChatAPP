@@ -18,9 +18,7 @@ if(WIN32)
             dwmapi.lib
             opengl32.lib
     )
-elseif(UNIX AND NOT APPLE)
-    target_compile_definitions(window PRIVATE IS_LINUX)
-    
+elseif(UNIX AND NOT APPLE)    
     target_sources(window PRIVATE Linux/linux_window.cpp Linux/linux_context.cpp)
     target_link_libraries(
         window

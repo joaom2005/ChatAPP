@@ -21,7 +21,7 @@ public:
   float getPixelHeight() const { return m_pixelHeight; }
 
 private:
-  unsigned int m_atlasTexture;
+  unsigned int m_atlasTexture = 0;
   float m_pixelHeight;
   std::unordered_map<char, Glyph> m_glyphs;
 };

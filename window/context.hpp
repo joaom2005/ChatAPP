@@ -8,10 +8,11 @@ class GLContext {
 public:
   virtual ~GLContext() = default;
 
-  virtual void swapBuffers() = 0;
+  virtual void swapBuffers()   = 0;
   virtual bool isValid() const = 0;
 };
 
+// The nativeHandle is platform specific. See corresponding _context.cpp
 std::unique_ptr<wWindow::GLContext> createGLContext(void *nativeHandle);
 } // namespace wWindow
 
