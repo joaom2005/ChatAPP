@@ -43,11 +43,12 @@ public:
 
 private:
   void handle(const KeyEvent &e) { m_keys[idx(e.key)] = e.pressed; }
-  void handle(const MouseMove &e) {
-    m_mouseDx += e.dx;
-    m_mouseDy += e.dy;
-    m_mouseX += e.dx;
-    m_mouseY += e.dy;
+  void handle(const MousePos &e) {
+    m_mouseDx = e.x - m_mouseX;
+    m_mouseX  = e.x;
+
+    m_mouseDy = e.y - m_mouseY;
+    m_mouseY  = e.y;
   }
 };
 } // namespace wWindow

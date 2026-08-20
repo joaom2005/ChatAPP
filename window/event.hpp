@@ -22,11 +22,11 @@ struct KeyEvent {
   Key key;
   bool pressed;
 };
-struct MouseMove {
-  int dx, dy;
+struct MousePos {
+  int x, y;
 };
 
-using Event = std::variant<KeyEvent, MouseMove>;
+using Event = std::variant<KeyEvent, MousePos>;
 
 class EventQueue {
   std::queue<Event> m_events;

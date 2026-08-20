@@ -12,12 +12,14 @@
 
 class LinuxWindow : public wWindow::Window {
 public:
-  LinuxWindow(std::shared_ptr<wWindow::EventQueue> eventQueue, int width,
-              int height, std::string title, std::string className) {
+  LinuxWindow(
+      std::shared_ptr<wWindow::EventQueue> eventQueue, int width, int height,
+      std::string title, std::string className
+  ) {
     m_eventQueue = eventQueue;
-    m_width = width;
-    m_height = height;
-    m_title = std::move(title);
+    m_width      = width;
+    m_height     = height;
+    m_title      = std::move(title);
 
     // Open X11 display
     display = XOpenDisplay(nullptr);
@@ -26,12 +28,12 @@ public:
     }
 
     // Get the default screen
-    int screen = DefaultScreen(display);
+    int screen          = DefaultScreen(display);
     ::Window rootWindow = RootWindow(display, screen);
 
     XSetWindowAttributes attrs = {};
-    attrs.background_pixmap = None; // stop X from auto-painting background
-    attrs.border_pixel = BlackPixel(display, screen);
+    attrs.background_pixmap    = None; // stop X from auto-painting background
+    attrs.border_pixel         = BlackPixel(display, screen);
     attrs.bit_gravity = ForgetGravity; // force full repaint instead of copying
                                        // stale content on resize
     attrs.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask |
@@ -44,7 +46,8 @@ public:
         CopyFromParent, // depth
         InputOutput,
         CopyFromParent, // visual — or pass the GLX visual if you have one
-        CWBackPixmap | CWBorderPixel | CWBitGravity | CWEventMask, &attrs);
+        CWBackPixmap | CWBorderPixel | CWBitGravity | CWEventMask, &attrs
+    );
 
     if (!window) {
       XCloseDisplay(display);
@@ -59,17 +62,19 @@ public:
     XSetWMProtocols(display, window, &wmDeleteWindow, 1);
 
     // Select input events
-    XSelectInput(display, window,
-                 ExposureMask | StructureNotifyMask | KeyPressMask |
-                     KeyReleaseMask | PointerMotionMask | ButtonPressMask |
-                     ButtonReleaseMask);
+    XSelectInput(
+        display, window,
+        ExposureMask | StructureNotifyMask | KeyPressMask | KeyReleaseMask |
+            PointerMotionMask | ButtonPressMask | ButtonReleaseMask
+    );
 
     // Map the window to the screen
     XMapWindow(display, window);
 
     // Create GL context to send
-    GLContextCreateInfo info{display,
-                             window}; // On stack because I only pass this once
+    GLContextCreateInfo info{
+        display, window
+    }; // On stack because I only pass this once
     glContext = wWindow::createGLContext(&info);
   }
 
@@ -107,7 +112,7 @@ public:
         break;
       }
       case ConfigureNotify: {
-        m_width = event.xconfigure.width;
+        m_width  = event.xconfigure.width;
         m_height = event.xconfigure.height;
         break;
       }
@@ -126,8 +131,7 @@ public:
         break;
       }
       case MotionNotify:
-        m_eventQueue->push(
-            wWindow::MouseMove{event.xmotion.x, event.xmotion.y});
+        m_eventQueue->push(wWindow::MousePos{event.xmotion.x, event.xmotion.y});
         break;
       case ButtonPress: {
         if (auto key = translateMouseButton(event.xbutton.button)) {
@@ -152,6 +156,8 @@ public:
       glContext->swapBuffers();
     }
   }
+
+  void setRenderCallback(std::function<void()> callback) override {}
 
   void forceClose() override { m_shouldClose = true; }
 
@@ -197,22 +203,23 @@ private:
   }
 
 private:
-  Display *display = nullptr;
-  ::Window window = 0;
+  Display *display    = nullptr;
+  ::Window window     = 0;
   Atom wmDeleteWindow = 0;
   std::unique_ptr<wWindow::GLContext> glContext;
   std::shared_ptr<wWindow::EventQueue> m_eventQueue;
 
-  int m_width = 0;
+  int m_width  = 0;
   int m_height = 0;
   std::string m_title;
   bool m_shouldClose = false;
 };
 
-std::unique_ptr<wWindow::Window>
-wWindow::createWindow(std::shared_ptr<wWindow::EventQueue> eventQueue,
-                      int width, int height, std::string title,
-                      std::string className) {
-  return std::make_unique<LinuxWindow>(eventQueue, width, height,
-                                       std::move(title), className);
+std::unique_ptr<wWindow::Window> wWindow::createWindow(
+    std::shared_ptr<wWindow::EventQueue> eventQueue, int width, int height,
+    std::string title, std::string className
+) {
+  return std::make_unique<LinuxWindow>(
+      eventQueue, width, height, std::move(title), className
+  );
 }

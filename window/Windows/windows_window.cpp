@@ -120,6 +120,10 @@ public:
     }
   }
 
+  void setRenderCallback(std::function<void()> callback) override {
+    m_RenderCallback = std::move(callback);
+  }
+
   void forceClose() {
     m_shouldClose = true;
     PostQuitMessage(0);
@@ -172,37 +176,14 @@ private:
         return 0;
       }
 
-      /* RESIZING SECTION - START */
       case WM_SIZE: {
         pThis->m_width  = LOWORD(lp); // New client area width
         pThis->m_height = HIWORD(lp); // New client area height
-        return 0;
-      }
 
-      case WM_ENTERSIZEMOVE: {
-        // User started resizing - set up a timer to keep rendering
-        SetTimer(hwnd, 1, 1, nullptr);
+        if (pThis->m_RenderCallback)
+          pThis->m_RenderCallback();
         return 0;
       }
-
-      case WM_EXITSIZEMOVE: {
-        // User finished resizing - kill the timer
-        KillTimer(hwnd, 1);
-        return 0;
-      }
-
-      case WM_TIMER: {
-        // During resize, keep processing messages and render
-        if (wp == 1) {
-          MSG msg;
-          while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-          }
-        }
-        return 0;
-      }
-        /* RESIZING SECTION - END */
 
         /* INPUT SECTION - START */
 
@@ -222,9 +203,7 @@ private:
 
       case WM_MOUSEMOVE:
         // compute delta, push MouseMove
-        pThis->m_eventQueue->push(
-            MouseMove{GET_X_LPARAM(lp), GET_Y_LPARAM(lp)}
-        );
+        pThis->m_eventQueue->push(MousePos{GET_X_LPARAM(lp), GET_Y_LPARAM(lp)});
         return 0;
 
       case WM_LBUTTONDOWN:
@@ -281,8 +260,11 @@ private:
 private:
   HWND hwnd = nullptr;
   HDC hdc   = nullptr;
+
   std::shared_ptr<wWindow::EventQueue> m_eventQueue;
   std::unique_ptr<wWindow::GLContext> glContext;
+
+  std::function<void()> m_RenderCallback;
 
   int m_width;
   int m_height;

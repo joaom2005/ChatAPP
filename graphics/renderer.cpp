@@ -11,6 +11,7 @@ Renderer::Renderer() {
       0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
   };
 
+  // Rect shader
   glGenVertexArrays(1, &m_rectVAO);
   glGenBuffers(1, &m_rectVBO);
 
@@ -21,8 +22,24 @@ Renderer::Renderer() {
   glEnableVertexAttribArray(0);
   glBindVertexArray(0);
 
-  // load .vert/.frag strings
   m_rectShader = std::make_unique<Shader>(rectVertSrc, rectFragSrc);
+
+  // Text shader
+  glGenVertexArrays(1, &m_textVAO);
+  glGenBuffers(1, &m_textVBO);
+
+  glBindVertexArray(m_textVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, m_textVBO);
+  glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+  glVertexAttribPointer(
+      1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float))
+  );
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glBindVertexArray(0);
+
+  m_textShader = std::make_unique<Shader>(textVertSrc, textFragSrc);
 }
 
 void Renderer::beginFrame(int width, int height, Color clearColor) {
