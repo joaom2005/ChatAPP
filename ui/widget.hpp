@@ -21,6 +21,13 @@ public:
   void addChild(std::unique_ptr<WidgetBase> child);
   bool hitTest(float x, float y) const;
 
+  // Events
+  virtual void onMouseEnter() {}
+  virtual void onMouseLeave() {}
+  virtual void onMouseDown(wWindow::Key button) {}
+  virtual void onMouseUp(wWindow::Key button) {}
+  virtual void onClick() {}
+
   // Getters
   float getX() const;
   float getY() const;
@@ -40,7 +47,7 @@ public:
   void setVisible(bool visible);
   void setFocused(bool focused);
 
-private:
+protected:
   float x            = 0.0f;
   float y            = 0.0f;
   float width        = 0.0f;

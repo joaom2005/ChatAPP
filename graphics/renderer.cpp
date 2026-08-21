@@ -65,7 +65,7 @@ void Renderer::drawRect(float x, float y, float w, float h, Color color) {
 }
 
 void Renderer::drawText(
-    float x, float y, const std::string &text, Font &font, Color color
+  float x, float y, const std::string &text, const Font &font, Color color
 ) {
   std::vector<float> verts; // x, y, u, v per vertex, 6 verts per glyph
 

@@ -21,7 +21,7 @@ public:
   void endFrame();
 
   void drawRect(float x, float y, float w, float h, Color color);
-  void drawText(float x, float y, const std::string &text, Font &font,
+  void drawText(float x, float y, const std::string &text, const Font &font,
                 Color color);
 
 private:

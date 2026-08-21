@@ -16,6 +16,11 @@ public:
   Font(const std::string &path, float pixelHeight);
   ~Font();
 
+  Font(const Font &)            = delete;
+  Font &operator=(const Font &) = delete;
+  Font(Font &&)                 = delete;
+  Font &operator=(Font &&)      = delete;
+
   const Glyph &getGlyph(char c) const { return m_glyphs.at(c); }
   unsigned int getAtlasTexture() const { return m_atlasTexture; }
   float getPixelHeight() const { return m_pixelHeight; }

@@ -3,6 +3,9 @@
 #include <window.hpp>
 #include <filesystem>
 
+#include <widgets/button_widget.hpp>
+#include <widgets/container_widget.hpp>
+
 int main(int argc, char **argv) {
   auto queue = std::make_shared<wWindow::EventQueue>();
   std::unique_ptr<wWindow::Window> window =
@@ -14,15 +17,24 @@ int main(int argc, char **argv) {
 
   auto executableDir = std::filesystem::absolute(argv[0]).parent_path();
   auto fontPath      = executableDir / "assets" / "fonts" / "arial.ttf";
-  wGraphics::Font Arial(fontPath.string(), 12);
+  wGraphics::Font Arial(fontPath.string(), 32);
+
+  auto root = std::make_unique<wWidget::ContainerWidget>();
+  root->addChild(
+      std::make_unique<wWidget::ButtonWidget>(
+          250.0f, 100.0f, 200.0f, 100.0f,
+          wGraphics::Color{0.5f, 0.5f, 0.5f, 1.0f}, "Click me", Arial,
+          wGraphics::Color{1.0f, 0.0f, 0.0f, 1.0f}
+      )
+  );
 
   auto renderFrame = [&]() {
     renderer.beginFrame(window->getWidth(), window->getHeight(), bgColor);
-    renderer.drawRect(50, 50, 200, 100, {1.0f, 0.0f, 0.0f, 1.0f});
-    renderer.drawText(
-        250, 100, "Hello, World!", Arial,
-        wGraphics::Color{0.5f, 0.5f, 0.5f, 1.0f}
-    );
+    // renderer.drawText(
+    //     250, 100, "Hello, World!", Arial,
+    //     wGraphics::Color{0.5f, 0.5f, 0.5f, 1.0f}
+    // );
+    root->draw(renderer);
     renderer.endFrame();
     window->swapBuffers();
   };

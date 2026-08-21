@@ -4,7 +4,7 @@
 #include "../widget.hpp"
 
 namespace wWidget {
-class Widget_Container : public WidgetBase {
+class ContainerWidget : public WidgetBase {
 public:
   void draw(wGraphics::Renderer &renderer) override {
     for (const auto &child : getChildren()) {
