@@ -1,5 +1,5 @@
-#ifndef __HPP_EVENT__
-#define __HPP_EVENT__
+#ifndef CHATAPP_WINDOW_EVENT_HPP
+#define CHATAPP_WINDOW_EVENT_HPP
 
 #include <queue>
 #include <variant>
@@ -44,4 +44,4 @@ public:
 };
 } // namespace wWindow
 
-#endif // __HPP_EVENT__
+#endif // CHATAPP_WINDOW_EVENT_HPP

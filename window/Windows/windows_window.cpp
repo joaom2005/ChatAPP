@@ -124,7 +124,7 @@ public:
     m_RenderCallback = std::move(callback);
   }
 
-  void forceClose() {
+  void forceClose() override {
     m_shouldClose = true;
     PostQuitMessage(0);
   }

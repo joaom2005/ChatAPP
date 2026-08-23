@@ -28,6 +28,20 @@ Font::Font(const std::string &path, float pixelHeight)
       96, bakedChars
   );
 
+  stbtt_fontinfo info;
+  if (!stbtt_InitFont(
+          &info, buffer.data(), stbtt_GetFontOffsetForIndex(buffer.data(), 0)
+      ))
+    throw std::runtime_error("Failed to init font metrics: " + path);
+
+  float scale = stbtt_ScaleForPixelHeight(&info, pixelHeight);
+
+  int ascentRaw, descentRaw, lineGapRaw;
+  stbtt_GetFontVMetrics(&info, &ascentRaw, &descentRaw, &lineGapRaw);
+
+  m_ascent  = ascentRaw * scale;
+  m_descent = descentRaw * scale;
+
   if (result <= 0)
     throw std::runtime_error("Font atlas too small or bake failed");
 
@@ -48,6 +62,7 @@ Font::Font(const std::string &path, float pixelHeight)
 
   glGenTextures(1, &m_atlasTexture);
   glBindTexture(GL_TEXTURE_2D, m_atlasTexture);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexImage2D(
       GL_TEXTURE_2D, 0, GL_RED, ATLAS_W, ATLAS_H, 0, GL_RED, GL_UNSIGNED_BYTE,
       atlasPixels.data()

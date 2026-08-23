@@ -1,5 +1,5 @@
-#ifndef __HPP_INPUT__
-#define __HPP_INPUT__
+#ifndef CHATAPP_WINDOW_INPUT_HPP
+#define CHATAPP_WINDOW_INPUT_HPP
 
 #include <array>
 #include <memory>
@@ -53,4 +53,4 @@ private:
 };
 } // namespace wWindow
 
-#endif // __HPP_INPUT__
+#endif // CHATAPP_WINDOW_INPUT_HPP

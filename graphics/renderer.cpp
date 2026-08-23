@@ -65,12 +65,12 @@ void Renderer::drawRect(float x, float y, float w, float h, Color color) {
 }
 
 void Renderer::drawText(
-  float x, float y, const std::string &text, const Font &font, Color color
+    float x, float y, const std::string &text, const Font &font, Color color
 ) {
   std::vector<float> verts; // x, y, u, v per vertex, 6 verts per glyph
 
   float cursorX = x;
-  float cursorY = y + font.getPixelHeight(); // baseline
+  float cursorY = y + font.getAscent(); // baseline
 
   for (char c : text) {
     const Glyph &g = font.getGlyph(c);

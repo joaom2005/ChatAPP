@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
       createWindow(queue, 800, 400, "ChatAPP", "chat-app");
   auto input = std::make_unique<wWindow::Input>(queue);
 
-  wGraphics::Renderer renderer;
+  wGraphics::Renderer renderer{};
   wGraphics::Color bgColor{1.0f, 1.0f, 1.0f, 1.0f};
 
   auto executableDir = std::filesystem::absolute(argv[0]).parent_path();

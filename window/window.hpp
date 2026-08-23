@@ -1,5 +1,5 @@
-#ifndef __HPP_WINDOW__
-#define __HPP_WINDOW__
+#ifndef CHATAPP_WINDOW_WINDOW_HPP
+#define CHATAPP_WINDOW_WINDOW_HPP
 
 #include "event.hpp"
 
@@ -37,4 +37,4 @@ std::unique_ptr<wWindow::Window> createWindow(
 );
 } // namespace wWindow
 
-#endif // __HPP_WINDOW__
+#endif // CHATAPP_WINDOW_WINDOW_HPP

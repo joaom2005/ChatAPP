@@ -1,5 +1,5 @@
-#ifndef __HPP_WIDGET__
-#define __HPP_WIDGET__
+#ifndef CHATAPP_UI_WIDGET_HPP
+#define CHATAPP_UI_WIDGET_HPP
 
 #include <memory>
 #include <vector>
@@ -64,4 +64,4 @@ private:
 };
 } // namespace wWidget
 
-#endif // __HPP_WIDGET__
+#endif // CHATAPP_UI_WIDGET_HPP

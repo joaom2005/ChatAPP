@@ -1,19 +1,23 @@
-#ifndef __TEXT_BUTTON__
-#define __TEXT_BUTTON__
+#ifndef TEXT_BUTTON
+#define TEXT_BUTTON
 
 #include "../widget.hpp"
 
 namespace wWidget {
 
-// This is an estimate; exact width depends on each glyph's font metrics.
-static float getTextSize(float fontSize, float length) {
-  return length * fontSize * 0.5f;
+static float
+measureTextWidth(const std::string &text, const wGraphics::Font &font) {
+  float width = 0.0f;
+  for (char c : text) {
+    width += font.getGlyph(c).advance;
+  }
+  return width;
 }
 
 class TextWidget : public WidgetBase {
 public:
   TextWidget(
-      float x, float y, const std::string &text, const wGraphics::Font &font,
+      float x, float y, const std::string text, const wGraphics::Font &font,
       const wGraphics::Color textColor
   )
       : WidgetBase{}, m_TextColor(textColor), m_Font(font),
@@ -21,8 +25,8 @@ public:
     setX(x);
     setY(y);
 
-    setWidth(getTextSize(font.getPixelHeight(), text.length()));
-    setHeight(font.getPixelHeight());
+    setWidth(measureTextWidth(m_displayText, font));
+    setHeight(font.getAscent() - font.getDescent());
   }
 
   void draw(wGraphics::Renderer &renderer) override {
@@ -43,4 +47,4 @@ private:
 };
 } // namespace wWidget
 
-#endif // __TEXT_BUTTON__
+#endif // TEXT_BUTTON

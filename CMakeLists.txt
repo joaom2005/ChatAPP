@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)  # Use -std=c++23, not -std=gnu++23
 
 # Enable warning as error
-set(CMAKE_COMPILE_WARNING_AS_ERROR on)
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 option(ENABLE_SANITIZERS "Enable sanitizers" ON)
 
@@ -30,6 +30,10 @@ if(ENABLE_SANITIZERS AND NOT MSVC)
         -fsanitize=address
         -fsanitize=undefined
     )
+endif()
+
+if(TARGET sanitizers)
+    link_libraries(sanitizers)
 endif()
 
 # Shared GLAD library compiled once for the whole project

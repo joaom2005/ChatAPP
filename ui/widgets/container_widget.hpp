@@ -1,5 +1,5 @@
-#ifndef __WIDGET_CONTAINER__
-#define __WIDGET_CONTAINER__
+#ifndef WIDGET_CONTAINER
+#define WIDGET_CONTAINER
 
 #include "../widget.hpp"
 
@@ -16,4 +16,4 @@ public:
 };
 } // namespace wWidget
 
-#endif // __WIDGET_CONTAINER__
+#endif // WIDGET_CONTAINER

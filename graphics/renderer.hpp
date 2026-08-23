@@ -1,5 +1,5 @@
-#ifndef __HPP_GRAPHICS__
-#define __HPP_GRAPHICS__
+#ifndef CHATAPP_GRAPHICS_RENDERER_HPP
+#define CHATAPP_GRAPHICS_RENDERER_HPP
 
 #include "font.hpp"
 #include "shader.hpp"
@@ -21,8 +21,9 @@ public:
   void endFrame();
 
   void drawRect(float x, float y, float w, float h, Color color);
-  void drawText(float x, float y, const std::string &text, const Font &font,
-                Color color);
+  void drawText(
+      float x, float y, const std::string &text, const Font &font, Color color
+  );
 
 private:
   int m_width = 0, m_height = 0;
@@ -87,4 +88,4 @@ void main() {
 
 } // namespace wGraphics
 
-#endif // __HPP_GRAPHICS__
+#endif // CHATAPP_GRAPHICS_RENDERER_HPP

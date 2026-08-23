@@ -1,5 +1,5 @@
-#ifndef __WIDGET_BUTTON__
-#define __WIDGET_BUTTON__
+#ifndef WIDGET_BUTTON
+#define WIDGET_BUTTON
 
 #include "../widget.hpp"
 
@@ -50,4 +50,4 @@ private:
 };
 } // namespace wWidget
 
-#endif // __WIDGET_BUTTON__
+#endif // WIDGET_BUTTON

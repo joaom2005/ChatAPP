@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CHATAPP_GRAPHICS_SHADER_HPP
+#define CHATAPP_GRAPHICS_SHADER_HPP
 #include <gtc/type_ptr.hpp>
 #include <string>
 
@@ -19,3 +20,5 @@ private:
 };
 
 } // namespace wGraphics
+
+#endif // CHATAPP_GRAPHICS_SHADER_HPP

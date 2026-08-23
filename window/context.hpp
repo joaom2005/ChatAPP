@@ -1,5 +1,5 @@
-#ifndef __HPP_CONTEXT__
-#define __HPP_CONTEXT__
+#ifndef CHATAPP_WINDOW_CONTEXT_HPP
+#define CHATAPP_WINDOW_CONTEXT_HPP
 
 #include <memory>
 
@@ -16,4 +16,4 @@ public:
 std::unique_ptr<wWindow::GLContext> createGLContext(void *nativeHandle);
 } // namespace wWindow
 
-#endif // __HPP_CONTEXT__
+#endif // CHATAPP_WINDOW_CONTEXT_HPP
