@@ -20,6 +20,7 @@ int main(int argc, char **argv) {
   wGraphics::Font Arial(fontPath.string(), 32);
 
   auto root = std::make_unique<wWidget::ContainerWidget>();
+  root->setX(root->getX() + 100);
   root->addChild(
       std::make_unique<wWidget::ButtonWidget>(
           250.0f, 100.0f, 200.0f, 100.0f,
@@ -30,10 +31,6 @@ int main(int argc, char **argv) {
 
   auto renderFrame = [&]() {
     renderer.beginFrame(window->getWidth(), window->getHeight(), bgColor);
-    // renderer.drawText(
-    //     250, 100, "Hello, World!", Arial,
-    //     wGraphics::Color{0.5f, 0.5f, 0.5f, 1.0f}
-    // );
     root->draw(renderer);
     renderer.endFrame();
     window->swapBuffers();

@@ -30,13 +30,16 @@ public:
 
   // Getters
   float getX() const;
+  float getRelativeX() const;
   float getY() const;
+  float getRelativeY() const;
   float getWidth() const;
   float getHeight() const;
   WidgetBase *getParent() const;
   const std::vector<std::unique_ptr<WidgetBase>> &getChildren() const;
   bool isVisible() const;
   bool isFocused() const;
+  bool isIteractive() const;
 
   // Setters
   void setX(float x);
@@ -46,16 +49,18 @@ public:
   void setHeight(float height);
   void setVisible(bool visible);
   void setFocused(bool focused);
+  void setIteractive(bool iteractive);
 
-protected:
+private:
   float x            = 0.0f;
   float y            = 0.0f;
   float width        = 0.0f;
   float height       = 0.0f;
   WidgetBase *parent = nullptr;
   std::vector<std::unique_ptr<WidgetBase>> children;
-  bool visible = true;
-  bool focused = false;
+  bool visible    = true;
+  bool focused    = false;
+  bool iteractive = false;
 };
 } // namespace wWidget
 
