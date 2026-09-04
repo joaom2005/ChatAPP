@@ -23,14 +23,13 @@ public:
   explicit Input(std::shared_ptr<EventQueue> queue)
       : m_queue(std::move(queue)) {}
 
-  void update() {
+  void beginFrame() {
     m_keysPrev = m_keys;
     m_mouseDx = m_mouseDy = 0;
+  }
 
-    Event e;
-    while (m_queue->poll(e)) {
-      std::visit([this](auto &&ev) { handle(ev); }, e);
-    }
+  void feed(const Event &e) {
+    std::visit([this](auto &&ev) { handle(ev); }, e);
   }
 
   bool isKeyDown(Key k) const { return m_keys[idx(k)]; }

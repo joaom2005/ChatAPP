@@ -12,6 +12,9 @@ void WidgetBase::addChild(std::unique_ptr<WidgetBase> child) {
 }
 
 bool WidgetBase::hitTest(float px, float py) const {
+  if (!isIteractive()) {
+    return false;
+  }
   float absX = getX();
   float absY = getY();
   return px >= absX && px <= absX + width && py >= absY && py <= absY + height;

@@ -4,6 +4,7 @@
 #include "../widget.hpp"
 
 #include "text_widget.hpp"
+#include <iostream>
 
 namespace wWidget {
 class ButtonWidget : public WidgetBase {
@@ -44,14 +45,14 @@ public:
     }
   }
 
-  
+  void onMouseEnter() override { std::cout << "Mouse Enter" << std::endl; }
+  void onMouseLeave() override { std::cout << "Mouse Exit" << std::endl; }
 
 private:
   wGraphics::Color m_BackgroundColor;
   wGraphics::Color m_HighlightedColor;
 
   TextWidget *m_label = nullptr;
-  
 };
 } // namespace wWidget
 

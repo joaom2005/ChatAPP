@@ -16,6 +16,7 @@ public:
 
   // main's event loop calls this once per polled wWindow::Event.
   void dispatch(const wWindow::Event &event);
+  void draw(wGraphics::Renderer &renderer);
 
 private:
   void handleMouseMove(int x, int y);

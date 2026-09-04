@@ -1,6 +1,6 @@
 add_library(ui STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/widget.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/UIManager.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/UIManager.cpp
     
 )
 

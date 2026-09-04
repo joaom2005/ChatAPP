@@ -21,15 +21,15 @@ WidgetBase *UIManager::hitTest(WidgetBase *node, float x, float y) const {
     return nullptr;
   }
 
-  if (!node->hitTest(x, y)) {
-    return nullptr;
-  }
-
   const auto &kids = node->getChildren();
   for (auto it = kids.rbegin(); it != kids.rend(); ++it) {
     if (WidgetBase *childHit = hitTest(it->get(), x, y)) {
       return childHit;
     }
+  }
+
+  if (!node->hitTest(x, y)) {
+    return nullptr;
   }
 
   return node->isIteractive() ? node : nullptr;
@@ -43,11 +43,20 @@ void UIManager::dispatch(const wWindow::Event &event) {
   }
 }
 
+void UIManager::draw(wGraphics::Renderer &renderer) {
+  if (root) {
+    root->draw(renderer);
+  }
+}
+
 void UIManager::handleMouseMove(int x, int y) {
   lastMouseX = x;
   lastMouseY = y;
 
   if (captured) {
+    // Dragging: hover state is frozen on the captured widget, everything
+    // else stays a no-op until release. Forward the raw position via
+    // onEvent since WidgetBase has no dedicated onMouseMove.
     captured->onEvent(wWindow::MousePos{x, y});
     return;
   }
@@ -109,10 +118,6 @@ void UIManager::handleKey(wWindow::Key key, bool pressed_) {
     return;
   }
 
-  // Non-mouse keys (W/A/S/D/Escape): no dedicated virtual on WidgetBase,
-  // so route the raw event to whichever widget currently has focus.
-  // DESIGN CALL, not confirmed against your intent: unfocused widgets
-  // never see keyboard input at all under this scheme.
   if (focused) {
     focused->onEvent(wWindow::KeyEvent{key, pressed_});
   }
