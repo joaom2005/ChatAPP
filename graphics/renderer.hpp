@@ -12,6 +12,26 @@ struct Color {
   float g = 0.0f;
   float b = 0.0f;
   float a = 1.0f;
+
+  void makeDarker(float amount = 0.1f) {
+    if (amount < 0.0f)
+      amount = 0.0f;
+    if (amount > 1.0f)
+      amount = 1.0f;
+    r *= 1.0f - amount;
+    g *= 1.0f - amount;
+    b *= 1.0f - amount;
+  }
+
+  void makeWhiter(float amount = 0.1f) {
+    if (amount < 0.0f)
+      amount = 0.0f;
+    if (amount > 1.0f)
+      amount = 1.0f;
+    r += (1.0f - r) * amount;
+    g += (1.0f - g) * amount;
+    b += (1.0f - b) * amount;
+  }
 };
 
 class Renderer {
@@ -21,9 +41,8 @@ public:
   void endFrame();
 
   void drawRect(float x, float y, float w, float h, Color color);
-  void drawText(
-      float x, float y, const std::string &text, const Font &font, Color color
-  );
+  void drawText(float x, float y, const std::string &text, const Font &font,
+                Color color);
 
 private:
   int m_width = 0, m_height = 0;

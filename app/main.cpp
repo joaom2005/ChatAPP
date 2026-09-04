@@ -1,7 +1,8 @@
+#include <UIManager.hpp>
+#include <filesystem>
 #include <input.hpp>
 #include <renderer.hpp>
 #include <window.hpp>
-#include <filesystem>
 
 #include <widgets/button_widget.hpp>
 #include <widgets/container_widget.hpp>
@@ -16,18 +17,14 @@ int main(int argc, char **argv) {
   wGraphics::Color bgColor{1.0f, 1.0f, 1.0f, 1.0f};
 
   auto executableDir = std::filesystem::absolute(argv[0]).parent_path();
-  auto fontPath      = executableDir / "assets" / "fonts" / "arial.ttf";
+  auto fontPath = executableDir / "assets" / "fonts" / "arial.ttf";
   wGraphics::Font Arial(fontPath.string(), 32);
 
   auto root = std::make_unique<wWidget::ContainerWidget>();
   root->setX(root->getX() + 100);
-  root->addChild(
-      std::make_unique<wWidget::ButtonWidget>(
-          250.0f, 100.0f, 200.0f, 100.0f,
-          wGraphics::Color{0.5f, 0.5f, 0.5f, 1.0f}, "Click me", Arial,
-          wGraphics::Color{1.0f, 0.0f, 0.0f, 1.0f}
-      )
-  );
+  root->addChild(std::make_unique<wWidget::ButtonWidget>(
+      250.0f, 100.0f, 200.0f, 100.0f, wGraphics::Color{0.5f, 0.5f, 0.5f, 1.0f},
+      "Click me", Arial, wGraphics::Color{1.0f, 0.0f, 0.0f, 1.0f}));
 
   auto renderFrame = [&]() {
     renderer.beginFrame(window->getWidth(), window->getHeight(), bgColor);
@@ -50,4 +47,11 @@ int main(int argc, char **argv) {
   }
 
   return 0;
+}
+
+// Disable sanizer check for nvidea library (cuz I can't do nothing about these
+// :p)
+extern "C" const char *__lsan_default_suppressions() {
+  return "leak:libnvidia-glcore.so\n"
+         "leak:libnvidia-glsi.so\n";
 }

@@ -8,11 +8,10 @@
 namespace wWidget {
 class ButtonWidget : public WidgetBase {
 public:
-  ButtonWidget(
-      const float x, const float y, const float width, const float height,
-      const wGraphics::Color BackgroundColor, const std::string &text,
-      const wGraphics::Font &font, const wGraphics::Color textColor
-  )
+  ButtonWidget(const float x, const float y, const float width,
+               const float height, const wGraphics::Color BackgroundColor,
+               const std::string &text, const wGraphics::Font &font,
+               const wGraphics::Color textColor)
       : WidgetBase{}, m_BackgroundColor(BackgroundColor) {
     setX(x);
     setY(y);
@@ -20,6 +19,9 @@ public:
     setHeight(height);
 
     setIteractive(true);
+
+    m_HighlightedColor = m_BackgroundColor;
+    m_HighlightedColor.makeDarker();
 
     auto textWidget =
         std::make_unique<TextWidget>(0.0f, 0.0f, text, font, textColor);
@@ -31,9 +33,8 @@ public:
 
   void draw(wGraphics::Renderer &renderer) override {
     // First draw the rect
-    renderer.drawRect(
-        getX(), getY(), getWidth(), getHeight(), m_BackgroundColor
-    );
+    renderer.drawRect(getX(), getY(), getWidth(), getHeight(),
+                      m_BackgroundColor);
 
     // Then draw the children
     for (const auto &child : getChildren()) {
@@ -43,10 +44,14 @@ public:
     }
   }
 
+  
+
 private:
   wGraphics::Color m_BackgroundColor;
+  wGraphics::Color m_HighlightedColor;
 
   TextWidget *m_label = nullptr;
+  
 };
 } // namespace wWidget
 
