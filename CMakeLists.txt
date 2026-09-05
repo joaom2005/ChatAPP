@@ -49,6 +49,7 @@ target_include_directories(glad
 )
 
 # Add subdirectories
+add_subdirectory(common)
 add_subdirectory(window)
 add_subdirectory(graphics)
 add_subdirectory(ui)

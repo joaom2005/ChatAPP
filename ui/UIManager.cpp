@@ -64,13 +64,15 @@ void UIManager::handleMouseMove(int x, int y) {
   WidgetBase *hit = root ? hitTest(root.get(), (float)x, (float)y) : nullptr;
 
   if (hit != hovered) {
-    if (hovered) {
+    if (hovered)
       hovered->onMouseLeave();
-    }
-    if (hit) {
+    if (hit)
       hit->onMouseEnter();
-    }
     hovered = hit;
+
+    if (cursorCallback) {
+      cursorCallback(hit ? hit->getCursor() : wCommon::CursorType::Arrow);
+    }
   }
 }
 
@@ -121,6 +123,11 @@ void UIManager::handleKey(wWindow::Key key, bool pressed_) {
   if (focused) {
     focused->onEvent(wWindow::KeyEvent{key, pressed_});
   }
+}
+
+void UIManager::setCursorCallback(
+    std::function<void(wCommon::CursorType)> callback) {
+  cursorCallback = std::move(callback);
 }
 
 } // namespace wWidget

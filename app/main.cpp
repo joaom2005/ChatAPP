@@ -1,4 +1,5 @@
 #include <UIManager.hpp>
+#include <cursor.hpp>
 #include <filesystem>
 #include <input.hpp>
 #include <renderer.hpp>
@@ -22,11 +23,13 @@ int main(int argc, char **argv) {
 
   auto root = std::make_unique<wWidget::ContainerWidget>();
   root->addChild(std::make_unique<wWidget::ButtonWidget>(
-      250.0f, 100.0f, 200.0f, 100.0f, wGraphics::Color{0.5f, 0.5f, 0.5f, 1.0f},
-      "Click me", Arial, wGraphics::Color{1.0f, 0.0f, 0.0f, 1.0f}));
+      250.0f, 100.0f, 200.0f, 100.0f, "Click me", Arial,
+      wGraphics::Color{1.0f, 0.0f, 0.0f, 1.0f}));
 
   wWidget::UIManager uiManager{};
   uiManager.setRoot(std::move(root));
+  uiManager.setCursorCallback(
+      [&](wCommon::CursorType c) { window->setCursor(c); });
 
   auto renderFrame = [&]() {
     renderer.beginFrame(window->getWidth(), window->getHeight(), bgColor);

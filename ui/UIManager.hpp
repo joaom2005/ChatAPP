@@ -18,6 +18,8 @@ public:
   void dispatch(const wWindow::Event &event);
   void draw(wGraphics::Renderer &renderer);
 
+  void setCursorCallback(std::function<void(wCommon::CursorType)> callback);
+
 private:
   void handleMouseMove(int x, int y);
   void handleKey(wWindow::Key key, bool pressed);
@@ -36,6 +38,8 @@ private:
 
   int lastMouseX = 0;
   int lastMouseY = 0;
+
+  std::function<void(wCommon::CursorType)> cursorCallback;
 };
 } // namespace wWidget
 

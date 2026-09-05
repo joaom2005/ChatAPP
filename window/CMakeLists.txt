@@ -8,6 +8,7 @@ target_include_directories(window
 target_link_libraries(window
     PUBLIC
         glad
+        common
 )
 
 if(WIN32)

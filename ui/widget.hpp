@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "cursor.hpp"
 #include "event.hpp"
 #include "renderer.hpp"
 
@@ -51,15 +52,19 @@ public:
   void setFocused(bool focused);
   void setIteractive(bool iteractive);
 
+  virtual wCommon::CursorType getCursor() const {
+    return wCommon::CursorType::Arrow;
+  }
+
 private:
-  float x            = 0.0f;
-  float y            = 0.0f;
-  float width        = 0.0f;
-  float height       = 0.0f;
+  float x = 0.0f;
+  float y = 0.0f;
+  float width = 0.0f;
+  float height = 0.0f;
   WidgetBase *parent = nullptr;
   std::vector<std::unique_ptr<WidgetBase>> children;
-  bool visible    = true;
-  bool focused    = false;
+  bool visible = true;
+  bool focused = false;
   bool iteractive = false;
 };
 } // namespace wWidget

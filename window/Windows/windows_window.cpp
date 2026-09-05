@@ -15,46 +15,40 @@
 
 class WindowsWindow : public wWindow::Window {
 public:
-  WindowsWindow(
-      std::shared_ptr<wWindow::EventQueue> eventQueue, int width, int height,
-      std::string title, std::string className
-  ) {
+  WindowsWindow(std::shared_ptr<wWindow::EventQueue> eventQueue, int width,
+                int height, std::string title, std::string className) {
     m_eventQueue = eventQueue;
-    m_width      = width;
-    m_height     = height;
-    m_title      = std::move(title);
+    m_width = width;
+    m_height = height;
+    m_title = std::move(title);
 
     // Register class
-    WNDCLASS wc    = {};
-    wc.style       = CS_OWNDC;
+    WNDCLASS wc = {};
+    wc.style = CS_OWNDC;
     wc.lpfnWndProc = WindowProc;
-    wc.hInstance   = GetModuleHandle(nullptr);
+    wc.hInstance = GetModuleHandle(nullptr);
     if (wc.hInstance == nullptr) {
-      throw std::runtime_error(
-          "Failed to get module handle: " + std::to_string(GetLastError())
-      );
+      throw std::runtime_error("Failed to get module handle: " +
+                               std::to_string(GetLastError()));
     }
     wc.lpszClassName = className.c_str();
 
     if (!RegisterClass(&wc)) {
       DWORD error = GetLastError();
       if (error != ERROR_CLASS_ALREADY_EXISTS) {
-        throw std::runtime_error(
-            "Failed to register window class: " + std::to_string(error)
-        );
+        throw std::runtime_error("Failed to register window class: " +
+                                 std::to_string(error));
       }
     }
 
-    hwnd = CreateWindowEx(
-        0, className.c_str(), m_title.c_str(), WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr,
-        wc.hInstance, nullptr
-    );
+    hwnd =
+        CreateWindowEx(0, className.c_str(), m_title.c_str(),
+                       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width,
+                       height, nullptr, nullptr, wc.hInstance, nullptr);
 
     if (hwnd == nullptr) {
-      throw std::runtime_error(
-          "Failed to create window: " + std::to_string(GetLastError())
-      );
+      throw std::runtime_error("Failed to create window: " +
+                               std::to_string(GetLastError()));
     }
 
     // Store pointer to this instance in the window's user data
@@ -69,12 +63,11 @@ public:
 
     hdc = GetDC(hwnd);
     if (!hdc) {
-      throw std::runtime_error(
-          "Failed to get device context: " + std::to_string(GetLastError())
-      );
+      throw std::runtime_error("Failed to get device context: " +
+                               std::to_string(GetLastError()));
     }
 
-    glContext = wWindow::createGLContext(hdc);
+    m_glContext = wWindow::createGLContext(hdc);
   }
 
   ~WindowsWindow() override {
@@ -152,8 +145,8 @@ private:
     }
   }
 
-  static LRESULT CALLBACK
-  WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
+  static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wp,
+                                     LPARAM lp) {
     using namespace wWindow;
     // Retrieve the instance pointer stored in GWLP_USERDATA
     WindowsWindow *pThis = nullptr;
@@ -164,8 +157,7 @@ private:
       SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)pThis);
     } else {
       pThis = reinterpret_cast<WindowsWindow *>(
-          GetWindowLongPtr(hwnd, GWLP_USERDATA)
-      );
+          GetWindowLongPtr(hwnd, GWLP_USERDATA));
     }
 
     if (pThis) {
@@ -177,7 +169,7 @@ private:
       }
 
       case WM_SIZE: {
-        pThis->m_width  = LOWORD(lp); // New client area width
+        pThis->m_width = LOWORD(lp);  // New client area width
         pThis->m_height = HIWORD(lp); // New client area height
 
         if (pThis->m_RenderCallback)
@@ -227,6 +219,17 @@ private:
 
         /* INPUT SECTION - END */
 
+      case WM_SETCURSOR: {
+        if (LOWORD(lp) == HTCLIENT) {
+          SetCursor(LoadCursor(nullptr, pThis->m_currentCursor ==
+                                                wWindow::CursorType::Hand
+                                            ? IDC_HAND
+                                            : IDC_ARROW));
+          return TRUE;
+        }
+        break; // let DefWindowProc handle borders/resize cursors
+      }
+
       default:
         break;
       }
@@ -238,9 +241,8 @@ private:
   void applyModernStyle(HWND hwnd) {
     // Dark mode title bar (Windows 10 1809+)
     BOOL darkMode = TRUE;
-    HRESULT hr    = DwmSetWindowAttribute(
-        hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode)
-    );
+    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                                       &darkMode, sizeof(darkMode));
     if (FAILED(hr)) {
       // Optional feature, ignore failure
       std::cerr << "Failed to set dark mode: " << hr << std::endl;
@@ -248,21 +250,27 @@ private:
 
     // Rounded corners (Windows 11 only, silently ignored on Win10)
     DWM_WINDOW_CORNER_PREFERENCE corner = DWMWCP_ROUND;
-    hr                                  = DwmSetWindowAttribute(
-        hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &corner, sizeof(corner)
-    );
+    hr = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &corner,
+                               sizeof(corner));
     if (FAILED(hr)) {
       // Optional feature, ignore failure
       std::cerr << "Failed to set rounded corners: " << hr << std::endl;
     }
   }
 
+  void setCursor(wWindow::CursorType cursor) override {
+    m_currentCursor = cursor;
+    // still call SetCursor for this frame; WM_SETCURSOR keeps it sticky
+    SetCursor(LoadCursor(
+        nullptr, cursor == wWindow::CursorType::Hand ? IDC_HAND : IDC_ARROW));
+  }
+
 private:
   HWND hwnd = nullptr;
-  HDC hdc   = nullptr;
+  HDC hdc = nullptr;
 
   std::shared_ptr<wWindow::EventQueue> m_eventQueue;
-  std::unique_ptr<wWindow::GLContext> glContext;
+  std::unique_ptr<wWindow::GLContext> m_glContext;
 
   std::function<void()> m_RenderCallback;
 
@@ -275,13 +283,14 @@ private:
 
   // Background color (RGBA)
   float m_bgColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+
+  wWindow::CursorType m_currentCursor = wWindow::CursorType::Arrow;
 };
 
-std::unique_ptr<wWindow::Window> wWindow::createWindow(
-    std::shared_ptr<wWindow::EventQueue> eventQueue, int width, int height,
-    std::string title, std::string className
-) {
-  return std::make_unique<WindowsWindow>(
-      eventQueue, width, height, std::move(title), className
-  );
+std::unique_ptr<wWindow::Window>
+wWindow::createWindow(std::shared_ptr<wWindow::EventQueue> eventQueue,
+                      int width, int height, std::string title,
+                      std::string className) {
+  return std::make_unique<WindowsWindow>(eventQueue, width, height,
+                                         std::move(title), className);
 }
