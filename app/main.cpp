@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
   auto input = std::make_unique<wWindow::Input>(queue);
 
   wGraphics::Renderer renderer{};
-  wGraphics::Color bgColor{1.0f, 1.0f, 1.0f, 1.0f};
+  wCommon::Color bgColor{1.0f, 1.0f, 1.0f, 1.0f};
 
   auto executableDir = std::filesystem::absolute(argv[0]).parent_path();
   auto fontPath = executableDir / "assets" / "fonts" / "arial.ttf";
@@ -23,8 +23,7 @@ int main(int argc, char **argv) {
 
   auto root = std::make_unique<wWidget::ContainerWidget>();
   root->addChild(std::make_unique<wWidget::ButtonWidget>(
-      250.0f, 100.0f, 200.0f, 100.0f, "Click me", Arial,
-      wGraphics::Color{1.0f, 0.0f, 0.0f, 1.0f}));
+      250.0f, 100.0f, 200.0f, 100.0f, "Click me", Arial));
 
   wWidget::UIManager uiManager{};
   uiManager.setRoot(std::move(root));

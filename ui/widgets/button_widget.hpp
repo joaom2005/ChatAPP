@@ -3,6 +3,7 @@
 
 #include "../widget.hpp"
 
+#include "color.hpp"
 #include "text_widget.hpp"
 #include <X11/X.h>
 #include <iostream>
@@ -12,17 +13,16 @@ class ButtonWidget : public WidgetBase {
 public:
   ButtonWidget(const float x, const float y, const float width,
                const float height, const std::string &text,
-               const wGraphics::Font &font, const wGraphics::Color textColor)
+               const wGraphics::Font &font)
       : WidgetBase{} {
     setX(x);
     setY(y);
     setWidth(width);
     setHeight(height);
-
     setIteractive(true);
 
-    auto textWidget =
-        std::make_unique<TextWidget>(0.0f, 0.0f, text, font, textColor);
+    auto textWidget = std::make_unique<TextWidget>(
+        0.0f, 0.0f, text, font, wCommon::Color{0.0f, 0.0f, 0.0f, 1.0f});
     textWidget->setX((width - textWidget->getWidth()) / 2.0f);
     textWidget->setY((height - textWidget->getHeight()) / 2.0f);
     m_label = textWidget.get();
@@ -55,9 +55,8 @@ public:
   }
 
 private:
-  wGraphics::Color m_BackgroundColor = wGraphics::Color{0.5f, 0.5f, 0.5f, 1.0f};
-  wGraphics::Color m_HighlightedColor =
-      wGraphics::Color{0.6f, 0.6f, 0.6f, 1.0f};
+  wCommon::Color m_BackgroundColor = wCommon::Color{0.94f, 0.94f, 0.94f, 1.0f};
+  wCommon::Color m_HighlightedColor = wCommon::Color{0.87f, 0.87f, 0.87f, 1.0f};
 
   TextWidget *m_label = nullptr;
 };

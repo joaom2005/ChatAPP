@@ -14,4 +14,5 @@ target_include_directories(graphics
 target_link_libraries(graphics
     PUBLIC
         glad
+        common
 )

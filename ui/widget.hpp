@@ -7,6 +7,7 @@
 #include "cursor.hpp"
 #include "event.hpp"
 #include "renderer.hpp"
+#include <color.hpp>
 
 namespace wWidget {
 class WidgetBase {

@@ -5,8 +5,8 @@
 
 namespace wWidget {
 
-static float
-measureTextWidth(const std::string &text, const wGraphics::Font &font) {
+static float measureTextWidth(const std::string &text,
+                              const wGraphics::Font &font) {
   float width = 0.0f;
   for (char c : text) {
     width += font.getGlyph(c).advance;
@@ -16,10 +16,8 @@ measureTextWidth(const std::string &text, const wGraphics::Font &font) {
 
 class TextWidget : public WidgetBase {
 public:
-  TextWidget(
-      float x, float y, const std::string text, const wGraphics::Font &font,
-      const wGraphics::Color textColor
-  )
+  TextWidget(float x, float y, const std::string text,
+             const wGraphics::Font &font, const wCommon::Color textColor)
       : WidgetBase{}, m_TextColor(textColor), m_Font(font),
         m_displayText(std::move(text)) {
     setX(x);
@@ -40,7 +38,7 @@ public:
   }
 
 private:
-  wGraphics::Color m_TextColor;
+  wCommon::Color m_TextColor;
 
   const wGraphics::Font &m_Font;
   std::string m_displayText;

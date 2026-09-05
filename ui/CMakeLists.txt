@@ -13,4 +13,5 @@ target_link_libraries(ui
     PUBLIC
         graphics
         window
+        common 
 )
