@@ -2,27 +2,17 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "Clang-cl Debug",
-            "displayName": "Clang-cl 22.1.4 x86_64-pc-windows-msvc",
-            "description": "Using compilers: C = C:\\Program Files\\LLVM\\bin\\clang-cl.exe, CXX = C:\\Program Files\\LLVM\\bin\\clang-cl.exe",
-            "binaryDir": "${sourceDir}/_build/out/build/${presetName}",
+            "name": "Visual Studio 2026",
+            "displayName": "Visual Studio Community 2026 Release - x86_amd64",
+            "description": "Using compilers for Visual Studio 18 2026 (x86_x64 architecture)",
+            "generator": "Visual Studio 18 2026",
+            "toolset": "host=x86",
+            "architecture": "x64",
+            "binaryDir": "${sourceDir}/_build/${presetName}",
             "cacheVariables": {
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
-                "CMAKE_C_COMPILER": "C:/Program Files/LLVM/bin/clang-cl.exe",
-                "CMAKE_CXX_COMPILER": "C:/Program Files/LLVM/bin/clang-cl.exe",
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "Clang-cl Release",
-            "displayName": "Clang-cl 22.1.4 x86_64-pc-windows-msvc",
-            "description": "Using compilers: C = C:\\Program Files\\LLVM\\bin\\clang-cl.exe, CXX = C:\\Program Files\\LLVM\\bin\\clang-cl.exe",
-            "binaryDir": "${sourceDir}/_build/out/build/${presetName}",
-            "cacheVariables": {
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
-                "CMAKE_C_COMPILER": "C:/Program Files/LLVM/bin/clang-cl.exe",
-                "CMAKE_CXX_COMPILER": "C:/Program Files/LLVM/bin/clang-cl.exe",
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe"
             }
         },
         {
@@ -37,6 +27,14 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Visual Studio 2026-debug",
+            "displayName": "Visual Studio Community 2026 Release - x86_amd64 - Debug",
+            "configurePreset": "Visual Studio 2026",
+            "configuration": "Debug"
         }
     ]
 }
