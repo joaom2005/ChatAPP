@@ -5,19 +5,32 @@
 
 namespace wWidget {
 
-static float measureTextWidth(const std::string &text,
-                              const wGraphics::Font &font) {
-  float width = 0.0f;
+static float
+measureTextWidth(const std::string &text, const wGraphics::Font &font) {
+  float maxWidth  = 0.0f;
+  float lineWidth = 0.0f;
+
   for (char c : text) {
-    width += font.getGlyph(c).advance;
+    if (c == '\r') {
+      continue;
+    }
+    if (c == '\n') {
+      maxWidth  = std::max(maxWidth, lineWidth);
+      lineWidth = 0.0f;
+      continue;
+    }
+    lineWidth += font.getGlyph(c).advance;
   }
-  return width;
+
+  return std::max(maxWidth, lineWidth); // catch the last line (no trailing \n)
 }
 
 class TextWidget : public WidgetBase {
 public:
-  TextWidget(float x, float y, const std::string text,
-             const wGraphics::Font &font, const wCommon::Color textColor)
+  TextWidget(
+      float x, float y, const std::string text, const wGraphics::Font &font,
+      const wCommon::Color textColor
+  )
       : WidgetBase{}, m_TextColor(textColor), m_Font(font),
         m_displayText(std::move(text)) {
     setX(x);
@@ -35,6 +48,13 @@ public:
     }
 
     renderer.drawText(getX(), getY(), m_displayText, m_Font, m_TextColor);
+  }
+
+  void setText(const std::string &newText) {
+    if (m_displayText != newText) {
+      m_displayText = newText;
+      setWidth(measureTextWidth(m_displayText, m_Font));
+    }
   }
 
 private:
