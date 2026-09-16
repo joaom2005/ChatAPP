@@ -66,43 +66,91 @@ void Renderer::drawRect(
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+static float measureWidth(const std::string_view &text, const Font &font) {
+  float width = 0.0f;
+  for (char c : text) {
+    if (c == '\n' || c == '\r')
+      continue;
+    width += font.getGlyph(c).advance;
+  }
+  return width;
+}
+
 void Renderer::drawText(
     float x, float y, const std::string &text, const Font &font,
-    wCommon::Color color
+    wCommon::Color color, wCommon::TextAlign align, float boxWidth
 ) {
-  std::vector<float> verts; // x, y, u, v per vertex, 6 verts per glyph
+  std::vector<std::string_view> lines;
+  size_t start = 0;
+  for (size_t i = 0; i <= text.size(); ++i) {
+    if (i == text.size() || text[i] == '\n') {
+      size_t len = i - start;
+      // trim trailing \r if present
+      if (len > 0 && text[start + len - 1] == '\r')
+        len--;
+      lines.emplace_back(text.data() + start, len);
+      start = i + 1;
+    }
+  }
 
-  float cursorX = x;
-  float cursorY = y + font.getAscent(); // baseline
-
+  std::vector<float> verts;
   const float lineHeight = font.getAscent() - font.getDescent();
+  float cursorY          = y + font.getAscent();
 
-  for (char c : text) {
-    if (c == '\r') {
-      continue;
-    }
-    if (c == '\n') {
-      cursorX = x;
-      cursorY += lineHeight;
-      continue;
-    }
+  for (size_t li = 0; li < lines.size(); ++li) {
+    const std::string_view &line = lines[li];
+    float lineWidth              = measureWidth(line, font);
 
-    const Glyph &g = font.getGlyph(c);
+    float startX           = x;
+    float extraSpacePerGap = 0.0f;
 
-    float x0 = cursorX + g.bearingX;
-    float y0 = cursorY + g.bearingY;
-    float x1 = x0 + g.width;
-    float y1 = y0 + g.height;
-
-    verts.insert(
-        verts.end(),
-        {
-            x0, y0, g.u0, g.v0, x1, y0, g.u1, g.v0, x1, y1, g.u1, g.v1,
-            x0, y0, g.u0, g.v0, x1, y1, g.u1, g.v1, x0, y1, g.u0, g.v1,
+    switch (align) {
+    case wCommon::TextAlign::Left:
+      startX = x;
+      break;
+    case wCommon::TextAlign::Right:
+      startX = x + boxWidth - lineWidth;
+      break;
+    case wCommon::TextAlign::Center:
+      startX = x + (boxWidth - lineWidth) * 0.5f;
+      break;
+    case wCommon::TextAlign::Fill: {
+      startX          = x;
+      bool isLastLine = (li == lines.size() - 1);
+      if (!isLastLine && lineWidth < boxWidth) {
+        size_t spaceCount = std::count(line.begin(), line.end(), ' ');
+        if (spaceCount > 0) {
+          extraSpacePerGap = (boxWidth - lineWidth) / (float)spaceCount;
         }
-    );
+      }
+      break;
+    }
+    }
 
-    cursorX += g.advance;
+    float cursorX = startX;
+    for (char c : line) {
+      const Glyph &g = font.getGlyph(c);
+
+      float x0 = cursorX + g.bearingX;
+      float y0 = cursorY + g.bearingY;
+      float x1 = x0 + g.width;
+      float y1 = y0 + g.height;
+
+      verts.insert(
+          verts.end(),
+          {
+              x0, y0, g.u0, g.v0, x1, y0, g.u1, g.v0, x1, y1, g.u1, g.v1,
+              x0, y0, g.u0, g.v0, x1, y1, g.u1, g.v1, x0, y1, g.u0, g.v1,
+          }
+      );
+
+      cursorX += g.advance;
+      if (align == wCommon::TextAlign::Fill && c == ' ') {
+        cursorX += extraSpacePerGap;
+      }
+    }
+
+    cursorY += lineHeight;
   }
 
   glBindBuffer(GL_ARRAY_BUFFER, m_textVBO);

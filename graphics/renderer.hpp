@@ -1,9 +1,11 @@
 #ifndef CHATAPP_GRAPHICS_RENDERER_HPP
 #define CHATAPP_GRAPHICS_RENDERER_HPP
 
+#include "text.hpp"
 #include "font.hpp"
 #include "shader.hpp"
-#include <color.hpp>
+#include "color.hpp"
+
 #include <memory>
 
 namespace wGraphics {
@@ -15,8 +17,11 @@ public:
   void endFrame();
 
   void drawRect(float x, float y, float w, float h, wCommon::Color color);
-  void drawText(float x, float y, const std::string &text, const Font &font,
-                wCommon::Color color);
+  void drawText(
+      float x, float y, const std::string &text, const Font &font,
+      wCommon::Color color, wCommon::TextAlign align = wCommon::TextAlign::Left,
+      float boxWidth = 0.0f
+  );
 
 private:
   int m_width = 0, m_height = 0;

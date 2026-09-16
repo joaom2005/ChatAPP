@@ -2,28 +2,9 @@
 #define TEXT_BUTTON
 
 #include "../widget.hpp"
+#include "text.hpp"
 
 namespace wWidget {
-
-static float
-measureTextWidth(const std::string &text, const wGraphics::Font &font) {
-  float maxWidth  = 0.0f;
-  float lineWidth = 0.0f;
-
-  for (char c : text) {
-    if (c == '\r') {
-      continue;
-    }
-    if (c == '\n') {
-      maxWidth  = std::max(maxWidth, lineWidth);
-      lineWidth = 0.0f;
-      continue;
-    }
-    lineWidth += font.getGlyph(c).advance;
-  }
-
-  return std::max(maxWidth, lineWidth); // catch the last line (no trailing \n)
-}
 
 class TextWidget : public WidgetBase {
 public:
@@ -36,8 +17,7 @@ public:
     setX(x);
     setY(y);
 
-    setWidth(measureTextWidth(m_displayText, font));
-    setHeight(font.getAscent() - font.getDescent());
+    refreshSize();
   }
 
   void draw(wGraphics::Renderer &renderer) override {
@@ -47,14 +27,27 @@ public:
       }
     }
 
-    renderer.drawText(getX(), getY(), m_displayText, m_Font, m_TextColor);
+    renderer.drawText(
+        getX(), getY(), m_displayText, m_Font, m_TextColor,
+        wCommon::TextAlign::Center, getWidth()
+    );
   }
 
   void setText(const std::string &newText) {
     if (m_displayText != newText) {
       m_displayText = newText;
-      setWidth(measureTextWidth(m_displayText, m_Font));
+
+      refreshSize();
     }
+  }
+
+private:
+  void refreshSize() {
+    setWidth(wCommon::measureTextWidth(m_displayText, m_Font));
+    setHeight(
+        (m_Font.getAscent() - m_Font.getDescent()) *
+        wCommon::countLines(m_displayText)
+    );
   }
 
 private:

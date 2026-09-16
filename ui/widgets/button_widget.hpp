@@ -69,6 +69,7 @@ public:
     static int counter = 0;
     m_label->setText("Hello, World!\n" + std::to_string(counter++));
     m_label->setX((getWidth() - m_label->getWidth()) / 2.0f);
+    m_label->setY((getHeight() - m_label->getHeight()) / 2.0f);
   }
 
   wCommon::CursorType getCursor() const override {
